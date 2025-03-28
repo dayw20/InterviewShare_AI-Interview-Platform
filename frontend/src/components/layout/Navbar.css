@@ -1,0 +1,142 @@
+/* src/components/layout/Navbar.css */
+.navbar {
+    background-color: #9491eb;
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .navbar-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+  }
+  
+  .navbar-logo {
+    font-size: 24px;
+    font-weight: bold;
+    color: white;
+    text-decoration: none;
+  }
+  
+  .nav-menu {
+    display: flex;
+    gap: 25px;
+  }
+  
+  .nav-link {
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    font-size: 15px;
+    transition: color 0.2s;
+  }
+  
+  .nav-link:hover {
+    color: white;
+  }
+  
+  .navbar-buttons {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .btn {
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 14px;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  
+  .login-btn {
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+  }
+  
+  .login-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .register-btn, .new-post-btn {
+    background-color: #007bff;
+    color: white;
+  }
+  
+  .register-btn:hover, .new-post-btn:hover {
+    background-color: #0069d9;
+  }
+  
+  .dashboard-btn {
+    color: rgba(255, 255, 255, 0.85);
+  }
+  
+  .dashboard-btn:hover {
+    color: white;
+  }
+
+/* Ensure user-menu container is relatively positioned */
+.user-menu {
+  position: relative;
+}
+
+/* Hide dropdown by default */
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+  border-radius: 8px;
+  z-index: 100;
+}
+
+/* Show dropdown when hovering over .user-menu (including dropdown itself) */
+.user-menu:hover .dropdown-menu {
+  display: block;
+}
+
+/* Make sure image doesn't cut off dropdown trigger area */
+.user-avatar {
+  cursor: pointer;
+}
+
+.dropdown-menu {
+  transition: opacity 0.2s ease;
+}
+
+
+  .dropdown-menu a {
+    display: block;
+    padding: 12px 15px;
+    color: #343a40;
+    text-decoration: none;
+    font-size: 14px;
+  }
+  
+  .dropdown-menu a:hover {
+    background-color: #f8f9fa;
+  }
+  
+  .logout-btn {
+    width: 100%;
+    text-align: left;
+    padding: 12px 15px;
+    background: none;
+    border: none;
+    border-top: 1px solid #e9ecef;
+    font-size: 14px;
+    color: #dc3545;
+    cursor: pointer;
+  }
+  
+  .logout-btn:hover {
+    background-color: #f8f9fa;
+  }
