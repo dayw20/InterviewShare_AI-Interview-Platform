@@ -1,0 +1,13 @@
+Django==5.0.3
+djangorestframework==3.14.0
+django-cors-headers==4.3.1
+django-filter==23.5
+django-allauth==0.60.1
+dj-rest-auth==5.0.1
+requests==2.31.0
+psycopg2-binary==2.9.9
+gunicorn==21.2.0
+python-dotenv==1.0.1
+django-storages==1.14.2
+pillow==10.2.0
+whitenoise==6.6.0

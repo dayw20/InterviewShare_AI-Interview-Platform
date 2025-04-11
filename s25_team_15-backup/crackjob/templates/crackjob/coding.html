@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coding Practice</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.23.4/ace.js"></script>
+</head>
+<body>
+
+    <form method="POST">
+        {% csrf_token %}
+        <div id="editor" style="height: 400px; width: 50%;">{{ submitted_code|default:"# Write your Python code here" }}</div>
+        <textarea name="code" id="codeArea" style="display:none;"></textarea>
+        <br>
+        <button type="submit">Submit Code</button>
+    </form>
+
+    {% if output %}
+        <h3>Output:</h3>
+        <pre>{{ output }}</pre>
+    {% endif %}
+
+    <script>
+        var editor = ace.edit("editor");
+        editor.setTheme("ace/theme/monokai");
+        editor.session.setMode("ace/mode/python");
+    
+        // Before form submit, put code in hidden textarea
+        document.querySelector("form").addEventListener("submit", function () {
+            document.getElementById("codeArea").value = editor.getValue();
+        });
+    </script>
+
+</body>
+</html>
