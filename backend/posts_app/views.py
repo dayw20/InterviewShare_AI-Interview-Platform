@@ -29,7 +29,7 @@ class UserProfileViewSet(viewsets.ViewSet):
         try:
             user = User.objects.get(pk=pk)
             profile = user.profile
-            serializer = UserProfileSerializer(profile)
+            serializer = UserProfileSerializer(profile, context={'request': request})
             return Response(serializer.data)
         except User.DoesNotExist:
             return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -55,6 +55,14 @@ class UserProfileViewSet(viewsets.ViewSet):
         except User.DoesNotExist:
             return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 
+    @action(detail=False, methods=['get'])
+    def following(self, request):
+        profile = request.user.profile
+        following_profiles = profile.following.all()
+        serializer = UserProfileSerializer(following_profiles, many=True, context={'request': request})
+        return Response(serializer.data)
+
+
 
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.filter(visibility='public')
@@ -79,6 +87,11 @@ class PostViewSet(viewsets.ModelViewSet):
         round_type = self.request.query_params.get('round_type')
         if round_type:
             queryset = queryset.filter(interview_details__round_type=round_type)
+        
+        user_id = self.request.query_params.get('user')
+        if user_id:
+            queryset = queryset.filter(user__id=user_id)
+
 
         queryset = queryset.annotate(
             likes_count=Count('likes'),
@@ -198,6 +211,31 @@ class PostViewSet(viewsets.ModelViewSet):
         post_author_profile.save()
 
         return Response({'liked': liked, 'likes_count': post.likes.count()})
+
+    @action(detail=False, methods=['get'])
+    def my_posts(self, request):
+        if not request.user.is_authenticated:
+            return Response({"error": "Authentication required."}, status=status.HTTP_401_UNAUTHORIZED)
+
+        queryset = Post.objects.filter(user=request.user, visibility='public')
+
+        post_type = request.query_params.get('post_type')
+        if post_type:
+            queryset = queryset.filter(post_type=post_type)
+
+        # Annotate counts (keep it nice!)
+        queryset = queryset.annotate(
+            likes_count=Count('likes'),
+            comments_count=Count('comments')
+        )
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = PostListSerializer(page, many=True, context={'request': request})
+            return self.get_paginated_response(serializer.data)
+
+        serializer = PostListSerializer(queryset, many=True, context={'request': request})
+        return Response(serializer.data)
 
     
 @api_view(['POST'])

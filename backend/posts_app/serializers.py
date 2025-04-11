@@ -15,13 +15,24 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserProfile
-        fields = ['user', 'exp', 'total_post_views', 'total_likes', 'posts_count', 'activity_count', 'followers_count', 'following_count']
+        fields = [
+        'user', 'exp', 'total_post_views', 'total_likes',
+        'posts_count', 'activity_count',
+        'followers_count', 'following_count',
+        'is_following'  
+    ]
 
     def get_followers_count(self, obj):
         return obj.followers.count()
 
     def get_following_count(self, obj):
         return obj.user.profile.following.count()
+    
+    def get_is_following(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return obj in request.user.profile.following.all()
+        return False
 
 
 class CommentSerializer(serializers.ModelSerializer):
