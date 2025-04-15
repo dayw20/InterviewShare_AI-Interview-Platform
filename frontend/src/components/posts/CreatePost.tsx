@@ -1,10 +1,8 @@
-// src/components/posts/CreatePost.tsx
-import React, { useState, useEffect, ChangeEvent, FormEvent } from 'react';
+import React, { useState, useEffect, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PostFormData, PostData, NewPost } from '../../types';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -12,7 +10,8 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Label } from "@/components/ui/label";
 import PageHeader from '@/components/layout/PageHeader';
-import { Bold, Italic, List, ListOrdered, Code, Link as LinkIcon } from 'lucide-react';
+import { Bold, Italic, Code } from 'lucide-react';
+import { DatePicker } from './DatePicker';
 
 const getCookie = (name: string): string | null => {
   const value = `; ${document.cookie}`;
@@ -38,7 +37,6 @@ const CreatePost: React.FC = () => {
   const [companies, setCompanies] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-
   const [isBold, setIsBold] = useState<boolean>(false);
   const [isItalic, setIsItalic] = useState<boolean>(false);
 
@@ -46,11 +44,11 @@ const CreatePost: React.FC = () => {
     setCompanies(['Google', 'Amazon', 'Microsoft', 'Apple', 'Facebook']);
   }, []);
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
+  const handleChange = (e: React.FormEvent<HTMLDivElement>) => {
+    const contentElement = e.currentTarget as HTMLDivElement;
     setFormData({
       ...formData,
-      [name]: value,
+      content: contentElement.innerHTML,
     });
   };
 
@@ -62,15 +60,13 @@ const CreatePost: React.FC = () => {
   };
 
   const applyFormatting = (format: 'bold' | 'italic') => {
-    switch (format) {
-      case 'bold':
-        setIsBold(!isBold);
-        break;
-      case 'italic':
-        setIsItalic(!isItalic);
-        break;
-      default:
-        break;
+    const contentElement = document.getElementById('content-field');
+    if (contentElement) {
+      document.execCommand(format, false, '');
+      setFormData({
+        ...formData,
+        content: contentElement.innerHTML,
+      });
     }
   };
 
@@ -101,10 +97,7 @@ const CreatePost: React.FC = () => {
         };
       }
 
-      console.log('Sending data:', JSON.stringify(postData));
-
       const token = localStorage.getItem('token');
-
       const response = await fetch('/api/posts/', {
         method: 'POST',
         headers: {
@@ -118,7 +111,6 @@ const CreatePost: React.FC = () => {
 
       if (!response.ok) {
         const responseText = await response.text();
-        console.error('Server response:', responseText);
         try {
           const errorData = JSON.parse(responseText);
           throw new Error(errorData.message || 'Failed to create post');
@@ -128,10 +120,8 @@ const CreatePost: React.FC = () => {
       }
 
       const newPost: NewPost = await response.json();
-
       navigate(`/posts/${newPost.id}`);
     } catch (error) {
-      console.error('Error submitting post:', error);
       setError(error instanceof Error ? error.message : 'An unknown error occurred');
       window.scrollTo(0, 0);
     } finally {
@@ -156,8 +146,6 @@ const CreatePost: React.FC = () => {
 
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
-
-            {/* Form Fields */}
             <div className="flex flex-col gap-4">
 
               {/* Post Type Toggle */}
@@ -175,7 +163,7 @@ const CreatePost: React.FC = () => {
               {/* Title */}
               <div className="grid gap-2">
                 <Label htmlFor="title">Post Title</Label>
-                <Input id="title" name="title" value={formData.title} onChange={handleChange} placeholder="Enter a descriptive title" maxLength={255} required />
+                <Input id="title" name="title" value={formData.title} onChange={e => handleSelectChange('title', e.target.value)} placeholder="Enter a descriptive title" maxLength={255} required />
               </div>
 
               {/* Interview-specific Fields */}
@@ -184,7 +172,7 @@ const CreatePost: React.FC = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="grid gap-2">
                       <Label htmlFor="company">Company</Label>
-                      <Input id="company" name="company" value={formData.company} onChange={handleChange} placeholder="Enter company name" list="company-list" required />
+                      <Input id="company" name="company" value={formData.company} onChange={e => handleSelectChange('company', e.target.value)} placeholder="Enter company name" list="company-list" required />
                       <datalist id="company-list">
                         {companies.map(company => <option key={company} value={company} />)}
                       </datalist>
@@ -192,12 +180,26 @@ const CreatePost: React.FC = () => {
 
                     <div className="grid gap-2">
                       <Label htmlFor="position">Position</Label>
-                      <Input id="position" name="position" value={formData.position} onChange={handleChange} placeholder="Enter position (e.g., Software Engineer)" required />
+                      <Input id="position" name="position" value={formData.position} onChange={e => handleSelectChange('position', e.target.value)} placeholder="Enter position (e.g., Software Engineer)" required />
                     </div>
 
                     <div className="grid gap-2">
                       <Label htmlFor="interview_date">Interview Date</Label>
-                      <Input type="date" id="interview_date" name="interview_date" value={formData.interview_date} onChange={handleChange} className="w-full" />
+                      {/* Interview Date Section */}
+                      <div className="flex items-center gap-2">
+                        {/* Input Field */}
+                        <Input
+                          id="interview_date"
+                          name="interview_date"
+                          value={formData.interview_date}
+                          onChange={(e) => handleSelectChange('interview_date', e.target.value)}
+                          placeholder="mm/dd/yyyy"
+                          className="w-[240px]" // Adjust width of the input
+                        />
+
+                        {/* Date Picker Button */}
+                        <DatePicker value={formData.interview_date} onChange={(date) => handleSelectChange('interview_date', date)} />
+                      </div>
                     </div>
                   </div>
 
@@ -237,12 +239,41 @@ const CreatePost: React.FC = () => {
               {/* Content */}
               <div className="grid gap-2 mt-4">
                 <Label htmlFor="content">Content</Label>
+
+                {/* Toolbar for Bold and Italic */}
                 <div className="bg-muted p-1 rounded-md flex flex-wrap gap-1 mb-2">
-                  <Button type="button" variant={isBold ? "default" : "outline"} size="icon" onClick={() => applyFormatting('bold')} className="h-8 w-8"><Bold className="h-4 w-4" /></Button>
-                  <Button type="button" variant={isItalic ? "default" : "outline"} size="icon" onClick={() => applyFormatting('italic')} className="h-8 w-8"><Italic className="h-4 w-4" /></Button>
-                  {/* Future toolbar buttons */}
+                  <Button
+                    type="button"
+                    variant={isBold ? "default" : "outline"}
+                    size="icon"
+                    onClick={() => applyFormatting('bold')}
+                    className="h-8 w-8"
+                  >
+                    <Bold className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={isItalic ? "default" : "outline"}
+                    size="icon"
+                    onClick={() => applyFormatting('italic')}
+                    className="h-8 w-8"
+                  >
+                    <Italic className="h-4 w-4" />
+                  </Button>
                 </div>
-                <Textarea id="content" name="content" value={formData.content} onChange={handleChange} placeholder="Share your experience or thoughts..." rows={15} required className="min-h-[200px]" />
+
+                {/* Content Field with contentEditable */}
+                <div
+                  id="content-field"
+                  contentEditable
+                  onInput={handleChange}
+                  className="min-h-[200px] p-2 border rounded relative"
+                >
+                  {formData.content === "" && (
+                    <span className="absolute top-1 left-2 text-gray-400">Share your experience or thoughts...</span>
+                  )}
+                </div>
+
                 <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
                   <Code className="h-3 w-3" /> You can use Markdown for formatting.
                 </p>
@@ -269,19 +300,16 @@ const CreatePost: React.FC = () => {
                 </RadioGroup>
               </div>
 
-              {/* Buttons - inside form ✅ */}
+              {/* Buttons */}
               <div className="flex justify-between pt-6 gap-2">
                 <Button variant="outline" onClick={() => navigate(-1)}>Cancel</Button>
                 <div className="flex gap-2">
-                  <Button variant="outline">Save as Draft</Button>
                   <Button type="submit" disabled={isSubmitting}>
                     {isSubmitting ? 'Submitting...' : 'Publish Post'}
                   </Button>
                 </div>
               </div>
-
             </div>
-
           </form>
         </CardContent>
       </Card>

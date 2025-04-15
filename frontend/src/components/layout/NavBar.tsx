@@ -27,10 +27,10 @@ const Navbar: React.FC = () => {
   return (
     <nav className="w-full border-b bg-background sticky top-0 z-50">
       <div className="container mx-auto flex items-center justify-between px-4 py-3">
-        {/* Left: Logo and Menu */}
         <div className="flex items-center gap-6">
+        <img src="/public/logo.jpg" alt="InterviewHub Logo" className="h-8 w-8" />  {/* Logo */}
           <h1 className="text-xl font-bold">
-            InterviewShare
+            InterviewHub
           </h1>
 
           <div className="hidden md:flex gap-4">

@@ -4,6 +4,10 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Post, Comment, LikeResponse, PostDetailData } from '../../types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from '@/components/ui/label';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { XCircle } from 'lucide-react';
+
 import { 
   Card, 
   CardContent,
@@ -91,9 +95,9 @@ const PostDetail: React.FC = () => {
     }
   };
 
-  const handleReplySubmit = async (e: FormEvent) => {
+  const handleReplySubmit = async (e: FormEvent, parentCommentId: number) => {
     e.preventDefault();
-    if (!replyText.trim() || replyingTo === null || !id) return;
+    if (!replyText.trim() || !id) return;
 
     try {
       const token = localStorage.getItem('token');
@@ -108,11 +112,10 @@ const PostDetail: React.FC = () => {
           'Content-Type': 'application/json',
           'Authorization': `Token ${token}`,
         },
-        body: JSON.stringify({ content: replyText, parent_comment_id: replyingTo }),
+        body: JSON.stringify({ content: replyText, parent_comment_id: parentCommentId }),
       });
       fetchPost();
       setReplyText('');
-      setReplyingTo(null);
     } catch (error) {
       console.error('Error submitting reply:', error);
     }
@@ -281,10 +284,16 @@ const PostDetail: React.FC = () => {
                         if (!response.ok) throw new Error('Failed to update status');
                         const data = await response.json();
                         setPost(data);
-                        alert('✅ Status updated successfully');
+                        toast.success('Status updated successfully', {
+                          className: 'bg-green-500 text-white p-4 rounded-lg shadow-lg flex items-center space-x-2',
+                          icon: <ThumbsUp className="w-5 h-5 mr-2 text-white" />, 
+                        });
                       } catch (error) {
                         console.error(error);
-                        alert('❌ Failed to update status');
+                        toast.error('Failed to update status', {
+                          className: 'bg-red-500 text-white p-4 rounded-lg shadow-lg flex items-center space-x-2',
+                          icon: <XCircle className="w-5 h-5 mr-2 text-white" />, 
+                        });
                       } finally {
                         setIsUpdatingStatus(false);
                       }
@@ -421,31 +430,41 @@ const PostDetail: React.FC = () => {
                     </Button>
                   </div>
                   
-                  {replyingTo === comment.id && (
-                    <form className="mb-4 ml-6 border-l-2 pl-4" onSubmit={handleReplySubmit}>
-                      <Textarea
-                        value={replyText}
-                        onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setReplyText(e.target.value)}
-                        placeholder="Write a reply..."
-                        className="mb-2"
-                        required
-                      />
-                      <div className="flex justify-end gap-2">
-                        <Button 
-                          type="button" 
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setReplyingTo(null);
-                            setReplyText('');
-                          }}
-                        >
-                          Cancel
-                        </Button>
-                        <Button type="submit" size="sm">Reply</Button>
+                  {comment.replies && comment.replies.length > 0 && (
+                  <div className="ml-6 space-y-4 border-l-2 pl-4">
+                    {comment.replies.map(reply => (
+                      <div key={reply.id} className="bg-muted/50 rounded-md p-3">
+                        {/* Reply content */}
                       </div>
-                    </form>
-                  )}
+                    ))}
+                  </div>
+                )}
+
+                {replyingTo === comment.id && (
+                  <form className="mb-4 ml-6 border-l-2 pl-4" onSubmit={(e) => handleReplySubmit(e, comment.id)}>
+                    <Textarea
+                      value={replyText}
+                      onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setReplyText(e.target.value)}
+                      placeholder="Write a reply..."
+                      className="mb-2"
+                      required
+                    />
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setReplyingTo(null);
+                          setReplyText('');
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                      <Button type="submit" size="sm">Reply</Button>
+                    </div>
+                  </form>
+                )}
                   
                   {comment.replies && comment.replies.length > 0 && (
                     <div className="ml-6 space-y-4 border-l-2 pl-4">

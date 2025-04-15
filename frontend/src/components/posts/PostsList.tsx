@@ -55,18 +55,24 @@ const StyledPostItem: React.FC<{
           </span>
         </div>
         
-        <Button 
-          variant={post.liked ? "default" : "ghost"} 
-          size="sm"
-          onClick={(e) => {
-            e.stopPropagation();
-            onLike(post.id);
-          }}
-          className="gap-1"
-        >
-          <ThumbsUp className="h-3 w-3" />
-          <span className="text-xs">{post.likes_count || 0}</span>
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button 
+            variant={post.liked ? "default" : "ghost"} 
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              onLike(post.id);
+            }}
+            className="gap-1"
+          >
+            <ThumbsUp className="h-3 w-3" />
+            <span className="text-xs">{post.likes_count || 0}</span>
+          </Button>
+
+          <div className="text-xs text-muted-foreground">
+            <span>Comments: {post.comments_count || 0}</span>
+          </div>
+        </div>
       </CardFooter>
     </Card>
   );
@@ -271,13 +277,13 @@ const PostsList: React.FC = () => {
   };
   
   return (
-    <div className="container mx-auto px-4">
-      <div className="flex justify-between items-center mb-6">
+    <div className="container mx-auto px-4 pb-6">
+      <div className="flex justify-between items-center mb-4">
         <PageHeader title="Interview Experiences" description="Browse all shared interview posts" />
       </div>
   
       <div
-        className={`sticky top-[60px] z-40 bg-background border-b transition-transform duration-300 ${
+        className={`sticky top-[60px] z-40 mb-4 bg-background border-b transition-transform duration-300 ${
           showFilterBar ? 'translate-y-0 shadow-md' : '-translate-y-full'
         }`}        
       >
@@ -311,41 +317,38 @@ const PostsList: React.FC = () => {
         </div>
   
         <div className="order-first lg:order-last">
-          <Card className="w-full">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg flex items-center gap-1">
-                <Flame className="h-4 w-4 text-orange-500" />
-                Trending
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="divide-y">
-              {trendingPosts.length === 0 ? (
-                <div className="text-center py-6 text-muted-foreground">
-                  <p>No trending posts yet</p>
-                </div>
-              ) : (
-                trendingPosts.map(post => (
-                  <div
-                    key={post.id}
-                    className="py-3 cursor-pointer hover:bg-muted/50 transition-colors"
-                    onClick={() => navigate(`/posts/${post.id}`)}
-                  >
-                    <h4 className="font-medium line-clamp-1 mb-1">{post.title}</h4>
-                    <div className="flex justify-between items-center text-xs text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        {post.company && <span>{post.company}</span>}
-                        <span>{new Date(post.created_at).toLocaleDateString()}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <ThumbsUp className="h-3 w-3" />
-                        <span>{post.likes_count || 0}</span>
-                      </div>
+        <Card className="w-full bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-3xl font-semibold text-gray-800">Trending</CardTitle>
+          </CardHeader>
+          <CardContent className="divide-y">
+            {trendingPosts.length === 0 ? (
+              <div className="text-center py-4 text-muted-foreground">
+                <p>No trending posts yet</p>
+              </div>
+            ) : (
+              trendingPosts.map((post) => (
+                <div
+                  key={post.id}
+                  className="py-3 cursor-pointer hover:bg-muted/10 transition-colors rounded-lg p-3"
+                  onClick={() => navigate(`/posts/${post.id}`)}
+                >
+                  <h4 className="font-semibold text-base mb-2 text-gray-900 line-clamp-2">{post.title}</h4>
+                  <div className="flex justify-between items-center text-xs text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      {post.company && <span className="font-medium text-gray-600">{post.company}</span>}
+                      <span>{new Date(post.created_at).toLocaleDateString()}</span>
+                    </div>
+                    <div className="flex items-center gap-1 text-gray-500">
+                      <ThumbsUp className="h-3 w-3" />
+                      <span>{post.likes_count || 0}</span>
                     </div>
                   </div>
-                ))
-              )}
-            </CardContent>
-          </Card>
+                </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
         </div>
       </div>
     </div>

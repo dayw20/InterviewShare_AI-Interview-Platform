@@ -1,8 +1,8 @@
-// src/App.tsx
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css'; 
 import PostsList from './components/posts/PostsList';
 import PostDetail from './components/posts/PostDetail';
 import CreatePost from './components/posts/CreatePost';
@@ -65,6 +65,20 @@ const App: React.FC = () => {
     <Router>
       <ScrollToTop />
       <AnimatedRoutes />
+      <ToastContainer
+        position="top-right"
+        autoClose={200} 
+        hideProgressBar={false}
+        newestOnTop={true}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        toastClassName="bg-gray-800 text-white p-4 rounded-lg shadow-lg flex items-center space-x-2"
+        progressClassName="bg-blue-500"
+      />
+
     </Router>
   );
 };
