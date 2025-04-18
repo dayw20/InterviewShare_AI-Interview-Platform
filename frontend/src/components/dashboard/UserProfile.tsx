@@ -426,28 +426,28 @@ export default function UserProfile() {
               <div className="mt-2 font-semibold">
                 {userInfo?.user?.username || "Unknown"}
               </div>
-              {!isSelf && (
-                <Button
-                  onClick={handleFollowToggle}
-                  variant={isFollowing ? "outline" : "default"}
-                  className="mt-2"
-                >
-                  {isFollowing ? "Unfollow" : "Follow"}
-                </Button>
+              {isSelf ? (
+                <div className="flex justify-center items-center gap-6 text-center text-white py-4 rounded-md">
+                  <div onClick={() => fetchFollowList("following")} className="cursor-pointer">
+                    <div className="text-sm text-gray-400">Following</div>
+                    <div className="text-lg font-semibold text-gray-400">{userInfo?.following_count ?? 0}</div>
+                  </div>
+                  <div className="h-6 w-px bg-gray-600" />
+                  <div onClick={() => fetchFollowList("followers")} className="cursor-pointer">
+                    <div className="text-sm text-gray-400">Followers</div>
+                    <div className="text-lg font-semibold text-gray-400">{userInfo?.followers_count ?? 0}</div>
+                  </div>
+                </div>
+              ) : (
+                <div className="mt-4">
+                  <Button
+                    variant={isFollowing ? "secondary" : "default"}
+                    onClick={handleFollowToggle}
+                  >
+                    {isFollowing ? "Unfollow" : "Follow"}
+                  </Button>
+                </div>
               )}
-
-
-              <div className="flex justify-center items-center gap-6 text-center text-white py-4 rounded-md">
-                <div>
-                  <div className="text-sm text-gray-400">Following</div>
-                  <div className="text-lg font-semibold text-gray-400">{userInfo?.followers_count ?? 0}</div>
-                </div>
-                <div className="h-6 w-px bg-gray-600"></div>
-                <div>
-                  <div className="text-sm text-gray-400">Followed</div>
-                  <div className="text-lg font-semibold text-gray-400">{userInfo?.following_count ?? 0}</div>
-                </div>
-              </div>
             </CardContent>
           </Card>
 
@@ -508,7 +508,6 @@ export default function UserProfile() {
                     </text>
                   )}
 
-                  {/* 👇 禁用 tooltip 对 placeholder 显示 */}
                   <Tooltip/>
 
                   </PieChart>
@@ -647,6 +646,34 @@ export default function UserProfile() {
       </div>
 
       <TimelineDrawer open={!!selectedTimeline} onClose={() => setSelectedTimeline(null)} data={selectedTimeline ?? []} />
+      <Dialog open={dialogType !== null} onOpenChange={() => setDialogType(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{dialogType === "followers" ? "Followers" : "Following"}</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4 max-h-[300px] overflow-y-auto">
+            {followList.map(user => (
+              <div key={user.user.id} className="flex items-center gap-3">
+                <Avatar className="w-8 h-8">
+                  <AvatarImage src={user.avatar || "/default-avatar.png"} alt={user.user.username} />
+                  <AvatarFallback>{user.user.username?.[0]?.toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <Button
+                  variant="link"
+                  className="text-sm px-0"
+                  onClick={() => {
+                    setDialogType(null);
+                    window.location.href = `/users/${user.user.id}`;
+                  }}
+                >
+                  {user.user.username}
+                </Button>
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
