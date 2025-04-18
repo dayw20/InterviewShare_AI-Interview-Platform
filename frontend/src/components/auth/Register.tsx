@@ -6,7 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { GalleryVerticalEnd, Eye, EyeOff } from 'lucide-react';
-import { cn } from '@/lib/utils'; // Optional for cleaner class merging
+
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 const Register: React.FC = () => {
   const [form, setForm] = useState<RegisterForm>({ username: '', email: '', password1: '', password2: '' });
@@ -30,7 +31,7 @@ const Register: React.FC = () => {
     setError(null);
 
     try {
-      const res = await fetch("http://localhost:8000/auth/registration/", {
+      const res = await fetch(`${backendUrl}/auth/registration/`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "X-CSRFToken": csrfToken },
         credentials: "include",
@@ -40,7 +41,7 @@ const Register: React.FC = () => {
       const data = await res.json();
       if (!res.ok) throw new Error(Object.entries(data).map(([key, val]) => `${key}: ${val}`).join("\n"));
 
-      const loginRes = await fetch("http://localhost:8000/auth/login/", {
+      const loginRes = await fetch(`${backendUrl}/auth/login/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: form.username, password: form.password1 }),
@@ -51,7 +52,7 @@ const Register: React.FC = () => {
       const loginData = await loginRes.json() as LoginResponse;
       // login(loginData.key, { username: form.username });
  
-      const profileRes = await fetch("http://localhost:8000/api/users/me/", {
+      const profileRes = await fetch(`${backendUrl}/users/me/`, {
         headers: { Authorization: `Token ${loginData.key}` }
       });
       const profileData = await profileRes.json();

@@ -14,15 +14,15 @@ router.register('posts', PostViewSet, basename='posts')
 router.register('problems', ProblemViewSet, basename='problems')
 
 urlpatterns = [
-    path('api/', include(router.urls)),
+    path('', include(router.urls)),
     path('auth/', include('dj_rest_auth.urls')),
     path('auth/registration/', include('dj_rest_auth.registration.urls')),
     path('auth/social/', include('allauth.socialaccount.urls')),  
     path('auth/google/', google_login),
     path('csrf/', get_csrf_token),
-    path('api/code-verification/', code_verification),
-    path('api/test/', test_api),
-    path('api/ask/', ask_for_hint_solution_feedback, name='ask_for_hint_solution_feedback'),  
+    path('code-verification/', code_verification),
+    path('test/', test_api),
+    path('ask/', ask_for_hint_solution_feedback, name='ask_for_hint_solution_feedback'),  
 ]
 
 if settings.DEBUG:

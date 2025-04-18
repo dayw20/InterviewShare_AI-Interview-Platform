@@ -22,6 +22,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { ThumbsUp, Share2 } from 'lucide-react';
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 const PostDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -55,7 +56,7 @@ const PostDetail: React.FC = () => {
       if (token) {
         headers['Authorization'] = `Token ${token}`;
       }
-      const response = await fetch(`/api/posts/${id}/`, { headers });
+      const response = await fetch(`${backendUrl}/posts/${id}/`, { headers });
       if (!response.ok) throw new Error('Post not found');
       const data: PostDetailData = await response.json();
       // setPost({
@@ -82,7 +83,7 @@ const PostDetail: React.FC = () => {
         return;
       }
       
-      await fetch(`/api/posts/${id}/add_comment/`, {
+      await fetch(`${backendUrl}/posts/${id}/add_comment/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -108,7 +109,7 @@ const PostDetail: React.FC = () => {
         return;
       }
       
-      await fetch(`/api/posts/${id}/add_comment/`, {
+      await fetch(`${backendUrl}/posts/${id}/add_comment/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -133,7 +134,7 @@ const PostDetail: React.FC = () => {
         return;
       }
       
-      const response = await fetch(`/api/posts/${id}/like/`, {
+      const response = await fetch(`${backendUrl}/posts/${id}/like/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -279,7 +280,7 @@ const PostDetail: React.FC = () => {
                       setIsUpdatingStatus(true);
                       try {
                         const token = sessionStorage.getItem('token');
-                        const response = await fetch(`/api/posts/${post.id}/`, {
+                        const response = await fetch(`${backendUrl}/posts/${post.id}/`, {
                           method: 'PATCH',
                           headers: {
                             'Content-Type': 'application/json',

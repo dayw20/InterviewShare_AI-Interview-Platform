@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Flame, Plus, Search, ThumbsUp } from 'lucide-react';
 import PageHeader from '@/components/layout/PageHeader';
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 const StyledPostItem: React.FC<{
   post: Post;
@@ -126,7 +127,7 @@ const PostsList: React.FC = () => {
 
   const fetchTrendingPosts = async () => {
     try {
-      const response = await fetch('/api/posts/trending/');
+      const response = await fetch(`${backendUrl}/posts/trending/`);
       if (!response.ok) throw new Error('Failed to fetch trending posts');
       const data = await response.json();
       setTrendingPosts(data);
@@ -144,7 +145,7 @@ const PostsList: React.FC = () => {
       const headers: HeadersInit = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = `Token ${token}`;
 
-      const response = await fetch(`/api/posts/?${params.toString()}`, { headers });
+      const response = await fetch(`${backendUrl}/posts/?${params.toString()}`, { headers });
       if (!response.ok) throw new Error('Failed to fetch posts');
 
       const data = await response.json();
@@ -208,7 +209,7 @@ const PostsList: React.FC = () => {
     try {
       const token = sessionStorage.getItem('token');
       if (!token) return navigate('/login', { state: { from: location } });
-      const response = await fetch(`/api/posts/${postId}/like/`, {
+      const response = await fetch(`${backendUrl}/posts/${postId}/like/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Token ${token}` },
         credentials: 'include',

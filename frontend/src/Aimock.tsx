@@ -19,6 +19,7 @@ interface Problem {
   description: string;
   function_name: string;
 }
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 function Aimock() {
   const [output, setOutput] = useState<string>("");
@@ -50,7 +51,7 @@ function Aimock() {
 
   const handleCodeSubmit = async (code: string) => {
     try {
-      const response = await fetch("http://localhost:8000/api/code-verification/", {
+      const response = await fetch(`${backendUrl}/code-verification/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Mic, MicOff, Lightbulb, Code, MessageSquare } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 interface InteractiveProblemPanelProps {
   questionId: string;
@@ -89,7 +90,7 @@ const InteractiveProblemPanel: React.FC<InteractiveProblemPanelProps> = ({
         },
       ]);
 
-      const res = await fetch("http://localhost:8000/api/ask/", {
+      const res = await fetch(`${backendUrl}/ask/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),

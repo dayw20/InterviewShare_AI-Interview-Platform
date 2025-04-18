@@ -19,6 +19,7 @@ const getCookie = (name: string): string | null => {
   if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
   return null;
 };
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 const CreatePost: React.FC = () => {
   const navigate = useNavigate();
@@ -103,7 +104,7 @@ const CreatePost: React.FC = () => {
       }
 
       const token = sessionStorage.getItem('token');
-      const response = await fetch('/api/posts/', {
+      const response = await fetch(`${backendUrl}/posts/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

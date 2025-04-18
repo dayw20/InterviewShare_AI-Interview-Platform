@@ -11,6 +11,7 @@ interface Problem {
 interface ProblemsBarProps {
   onProblemSelect: (problem: Problem) => void;
 }
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 const ProblemsBar: React.FC<ProblemsBarProps> = ({ onProblemSelect }) => {
   const [problems, setProblems] = useState<Problem[]>([]);
@@ -18,7 +19,7 @@ const ProblemsBar: React.FC<ProblemsBarProps> = ({ onProblemSelect }) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/api/problems/")
+    fetch(`${backendUrl}/problems/`)
       .then((res) => {
         if (!res.ok) throw new Error("Network response was not ok");
         return res.json();

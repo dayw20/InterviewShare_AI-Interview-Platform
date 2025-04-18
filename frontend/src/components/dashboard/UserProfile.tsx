@@ -21,6 +21,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 export default function UserProfile() {
   // const [jobRecords, setJobRecords] = useState<any[]>([])
@@ -59,7 +60,7 @@ export default function UserProfile() {
     formData.append("avatar", selectedFile);
 
     try {
-      const res = await fetch("http://localhost:8000/api/users/upload_avatar/", {
+      const res = await fetch(`${backendUrl}/users/upload_avatar/`, {
         method: "POST",
         headers: {
           Authorization: `Token ${token}`,
@@ -109,7 +110,7 @@ export default function UserProfile() {
       const token = sessionStorage.getItem("token");
       if (!token) return;
 
-      const res = await fetch("http://localhost:8000/api/users/me/", {
+      const res = await fetch(`${backendUrl}/users/me/`, {
         headers: { Authorization: `Token ${token}` },
       });
 
@@ -127,7 +128,7 @@ export default function UserProfile() {
       const token = sessionStorage.getItem("token");
       if (!token) return;
   
-      const res = await fetch(`http://localhost:8000/api/users/${id}/followers/`, {
+      const res = await fetch(`${backendUrl}/users/${id}/followers/`, {
         headers: { Authorization: `Token ${token}` },
       });
   
@@ -150,8 +151,8 @@ export default function UserProfile() {
       if (!token) return;
   
       const url = id
-        ? `http://localhost:8000/api/users/${id}/`
-        : `http://localhost:8000/api/users/me/`;
+        ? `${backendUrl}/users/${id}/`
+        : `${backendUrl}/users/me/`;
   
       try {
         const response = await fetch(url, {
@@ -221,7 +222,7 @@ export default function UserProfile() {
   const fetchFollowList = async (type: "followers" | "following") => {
     if (!userInfo?.user?.id) return;
     const token = sessionStorage.getItem("token");
-    const res = await fetch(`http://localhost:8000/api/users/${userInfo.user.id}/${type}/`, {
+    const res = await fetch(`${backendUrl}/users/${userInfo.user.id}/${type}/`, {
       headers: {
         Authorization: `Token ${token}`,
       },
@@ -238,7 +239,7 @@ export default function UserProfile() {
       if (!token) return;
   
       const response = await fetch(
-        `/api/users/${id}/follow/`,
+        `${backendUrl}/users/${id}/follow/`,
         {
           method: "POST",
           headers: {
@@ -263,7 +264,7 @@ export default function UserProfile() {
 
   // const handleRowClick = async (record: any) => {
   //   try {
-  //     const response = await fetch(`http://localhost:8000/api/posts/my_posts/?post_type=interview&company=${record.company}&position=${record.position}`, {
+  //     const response = await fetch(`${backendUrl}/api/posts/my_posts/?post_type=interview&company=${record.company}&position=${record.position}`, {
   //       headers: {
   //         Authorization: `Token ${sessionStorage.getItem("token")}`,
   //       },
@@ -290,7 +291,7 @@ export default function UserProfile() {
        const userId = userInfo?.user?.id; // 💡 当前主页对应的用户 ID
  
        const response = await fetch(
-         `http://localhost:8000/api/users/user_timeline/?company=${record.company}&position=${record.position}&user_id=${userId}`,
+         `${backendUrl}/users/user_timeline/?company=${record.company}&position=${record.position}&user_id=${userId}`,
          {
            headers: {
              Authorization: `Token ${token}`,

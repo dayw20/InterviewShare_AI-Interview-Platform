@@ -7,8 +7,10 @@ import { LoginForm, LoginResponse } from '../../types/auth';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { GalleryVerticalEnd } from 'lucide-react';
 import { GoogleJwtPayload } from '../../types/auth';
+
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -23,7 +25,7 @@ const Login: React.FC = () => {
   const handleManualLogin = async (e: FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch("http://localhost:8000/auth/login/", {
+      const res = await fetch(`${backendUrl}/auth/login/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -31,7 +33,7 @@ const Login: React.FC = () => {
       if (!res.ok) throw new Error("Invalid credentials");
       const data = await res.json() as LoginResponse;
       // login(data.key, { username: form.username });
-      const profileRes = await fetch("http://localhost:8000/api/users/me/", {
+      const profileRes = await fetch(`${backendUrl}/users/me/`, {
         headers: { Authorization: `Token ${data.key}` }
       });
       const profileData = await profileRes.json();
@@ -57,7 +59,7 @@ const Login: React.FC = () => {
     const decoded = jwtDecode<GoogleJwtPayload>(token);
 
     try {
-      const res = await fetch("http://localhost:8000/auth/google/", {
+      const res = await fetch(`${backendUrl}/auth/google/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token }),
@@ -67,7 +69,7 @@ const Login: React.FC = () => {
         const data = await res.json();
         // login(data.token, data.user);
  
-        const profileRes = await fetch("http://localhost:8000/api/users/me/", {
+        const profileRes = await fetch(`${backendUrl}/users/me/`, {
           headers: { Authorization: `Token ${data.token}` }
         });
     
