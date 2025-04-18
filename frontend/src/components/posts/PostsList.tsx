@@ -10,6 +10,14 @@ import { Search, ThumbsUp } from 'lucide-react';
 import PageHeader from '@/components/layout/PageHeader';
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
+const getCookie = (name: string): string | null => {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
+  return null;
+};
+
+
 const StyledPostItem: React.FC<{
   post: Post;
   onLike: (postId: number) => void;
@@ -209,11 +217,18 @@ const PostsList: React.FC = () => {
     try {
       const token = sessionStorage.getItem('token');
       if (!token) return navigate('/login', { state: { from: location } });
+      const csrfToken = getCookie('csrftoken') || '';
+
       const response = await fetch(`${backendUrl}/posts/${postId}/like/`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Token ${token}` },
-        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Token ${token}`,
+          'X-CSRFToken': csrfToken, 
+        },
+        credentials: 'include', 
       });
+
       if (!response.ok) throw new Error('Failed to like');
       const data = await response.json();
       setPosts(prev => prev.map(p => p.id === postId ? { ...p, likes_count: data.likes_count, liked: data.liked } : p));

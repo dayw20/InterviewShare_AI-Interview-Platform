@@ -21,6 +21,15 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { ThumbsUp } from 'lucide-react';
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
+const getCookie = (name: string): string | null => {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
+  return null;
+};
+
+
 const roundTypeMap: Record<number, string> = {
   0: "Application",
   1: "Online Assessment",
@@ -91,7 +100,9 @@ const PostDetail: React.FC = () => {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Token ${token}`,
+          'X-CSRFToken': getCookie('csrftoken') || '',
         },
+        credentials: 'include',
         body: JSON.stringify({ content: commentText }),
       });
       fetchPost();
@@ -117,8 +128,11 @@ const PostDetail: React.FC = () => {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Token ${token}`,
+          'X-CSRFToken': getCookie('csrftoken') || '',
         },
         body: JSON.stringify({ content: replyText, parent_comment_id: parentCommentId }),
+        credentials: 'include',
+        
       });
       fetchPost();
       setReplyText('');
@@ -142,6 +156,7 @@ const PostDetail: React.FC = () => {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Token ${token}`,
+          'X-CSRFToken': getCookie('csrftoken') || '',
         },
         credentials: 'include',
       });
@@ -281,10 +296,12 @@ const PostDetail: React.FC = () => {
                           headers: {
                             'Content-Type': 'application/json',
                             'Authorization': `Token ${token}`,
+                            'X-CSRFToken': getCookie('csrftoken') || '',
                           },
                           body: JSON.stringify({
                             interview_details: { status: value },
                           }),
+                          credentials: 'include',
                         });
                         if (!response.ok) throw new Error('Failed to update status');
                         const data = await response.json();

@@ -23,6 +23,15 @@ import {
 } from "@/components/ui/dropdown-menu"
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
+const getCookie = (name: string): string | null => {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
+  return null;
+};
+
+
+
 export default function UserProfile() {
   // const [jobRecords, setJobRecords] = useState<any[]>([])
   const [groupedRecords, setGroupedRecords] = useState<any[]>([])
@@ -60,12 +69,16 @@ export default function UserProfile() {
     formData.append("avatar", selectedFile);
 
     try {
+      const csrfToken = getCookie('csrftoken') || '';
+
       const res = await fetch(`${backendUrl}/users/upload_avatar/`, {
         method: "POST",
         headers: {
           Authorization: `Token ${token}`,
+          'X-CSRFToken': csrfToken, 
         },
         body: formData,
+        credentials: 'include',
       });
 
       if (!res.ok) throw new Error("Upload failed");
@@ -241,17 +254,17 @@ export default function UserProfile() {
     try {
       const token = sessionStorage.getItem("token");
       if (!token) return;
+      const csrfToken = getCookie('csrftoken') || '';
   
-      const response = await fetch(
-        `${backendUrl}/users/${id}/follow/`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Token ${token}`,
-          },
-        }
-      );
+      const response = await fetch(`${backendUrl}/users/${id}/follow/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Token ${token}`,
+          'X-CSRFToken': csrfToken, 
+        },
+        credentials: 'include',      
+      });
       if (response.ok) {
         const newFollowStatus = !isFollowing;
         setIsFollowing(newFollowStatus);
@@ -292,7 +305,7 @@ export default function UserProfile() {
       const token = sessionStorage.getItem("token");
        if (!token) return;
  
-       const userId = userInfo?.user?.id; // 💡 当前主页对应的用户 ID
+       const userId = userInfo?.user?.id; 
  
        const response = await fetch(
          `${backendUrl}/users/user_timeline/?company=${record.company}&position=${record.position}&user_id=${userId}`,

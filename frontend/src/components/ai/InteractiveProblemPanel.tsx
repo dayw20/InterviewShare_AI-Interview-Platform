@@ -11,6 +11,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Mic, MicOff, Lightbulb, Code, MessageSquare } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
+const getCookie = (name: string): string | null => {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
+  return null;
+};
 
 interface InteractiveProblemPanelProps {
   questionId: string;
@@ -90,11 +96,18 @@ const InteractiveProblemPanel: React.FC<InteractiveProblemPanelProps> = ({
         },
       ]);
 
+      const csrfToken = getCookie("csrftoken") || "";
+
       const res = await fetch(`${backendUrl}/ask/`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": csrfToken, 
+        },
+        credentials: "include", 
         body: JSON.stringify(body),
       });
+
       const data = await res.json();
       setTypingMessage(data.answer || "No answer received.");
     } catch (err) {

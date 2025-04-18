@@ -19,7 +19,16 @@ interface Problem {
   description: string;
   function_name: string;
 }
+
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
+const getCookie = (name: string): string | null => {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
+  return null;
+};
+
 
 function Aimock() {
   const [output, setOutput] = useState<string>("");
@@ -50,12 +59,15 @@ function Aimock() {
   };
 
   const handleCodeSubmit = async (code: string) => {
+    const csrfToken = getCookie('csrftoken') || '';
     try {
       const response = await fetch(`${backendUrl}/code-verification/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "X-CSRFToken": csrfToken,          
         },
+        credentials: 'include',           
         body: JSON.stringify({
           code,
           language: "python3",
