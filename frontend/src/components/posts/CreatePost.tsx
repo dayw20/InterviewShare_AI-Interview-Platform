@@ -1,4 +1,4 @@
-import React, { useState, useEffect, FormEvent } from 'react';
+import React, { useState, useEffect, FormEvent, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PostFormData, PostData, NewPost } from '../../types';
 import { Button } from "@/components/ui/button";
@@ -39,34 +39,39 @@ const CreatePost: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isBold, setIsBold] = useState<boolean>(false);
   const [isItalic, setIsItalic] = useState<boolean>(false);
+  const contentRef = useRef<HTMLDivElement | null>(null);
+
 
   useEffect(() => {
     setCompanies(['Google', 'Amazon', 'Microsoft', 'Apple', 'Facebook']);
   }, []);
 
+  useEffect(() => {
+    const el = contentRef.current;
+    if (el) {
+      if (formData.content.trim() === '') {
+        el.setAttribute('data-placeholder', 'Share your experience or thoughts...');
+      } else {
+        el.removeAttribute('data-placeholder');
+      }
+    }
+  }, [formData.content]);
+  
+
   const handleChange = (e: React.FormEvent<HTMLDivElement>) => {
     const contentElement = e.currentTarget as HTMLDivElement;
-    setFormData({
-      ...formData,
-      content: contentElement.innerHTML,
-    });
+    setFormData({ ...formData, content: contentElement.innerText });
   };
 
   const handleSelectChange = (name: string, value: string | number) => {
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    setFormData({ ...formData, [name]: value });
   };
 
-  const applyFormatting = (format: 'bold' | 'italic') => {
+    const applyFormatting = (format: 'bold' | 'italic') => {
     const contentElement = document.getElementById('content-field');
     if (contentElement) {
       document.execCommand(format, false, '');
-      setFormData({
-        ...formData,
-        content: contentElement.innerHTML,
-      });
+      setFormData({ ...formData, content: contentElement.innerText });
     }
   };
 
@@ -97,7 +102,7 @@ const CreatePost: React.FC = () => {
         };
       }
 
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       const response = await fetch('/api/posts/', {
         method: 'POST',
         headers: {
@@ -129,8 +134,12 @@ const CreatePost: React.FC = () => {
     }
   };
 
+  const preventEnterSubmit = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') e.preventDefault();
+  };
+
   return (
-    <div className="max-w-4xl w-full mx-auto">
+<div className="max-w-4xl w-full mx-auto">
       <Card className="w-full">
         <CardHeader>
           <PageHeader title="Create New Post" description="Share your experience with the community" />
@@ -144,7 +153,7 @@ const CreatePost: React.FC = () => {
           </div>
         )}
 
-        <CardContent>
+      <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="flex flex-col gap-4">
 
@@ -163,7 +172,7 @@ const CreatePost: React.FC = () => {
               {/* Title */}
               <div className="grid gap-2">
                 <Label htmlFor="title">Post Title</Label>
-                <Input id="title" name="title" value={formData.title} onChange={e => handleSelectChange('title', e.target.value)} placeholder="Enter a descriptive title" maxLength={255} required />
+                <Input id="title" name="title" value={formData.title} onChange={e => handleSelectChange('title', e.target.value)} onKeyDown={preventEnterSubmit} placeholder="Enter a descriptive title" maxLength={255} required />
               </div>
 
               {/* Interview-specific Fields */}
@@ -172,7 +181,7 @@ const CreatePost: React.FC = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="grid gap-2">
                       <Label htmlFor="company">Company</Label>
-                      <Input id="company" name="company" value={formData.company} onChange={e => handleSelectChange('company', e.target.value)} placeholder="Enter company name" list="company-list" required />
+                      <Input id="company" name="company" value={formData.company} onChange={e => handleSelectChange('company', e.target.value)} onKeyDown={preventEnterSubmit} placeholder="Enter company name" list="company-list" required />
                       <datalist id="company-list">
                         {companies.map(company => <option key={company} value={company} />)}
                       </datalist>
@@ -180,55 +189,42 @@ const CreatePost: React.FC = () => {
 
                     <div className="grid gap-2">
                       <Label htmlFor="position">Position</Label>
-                      <Input id="position" name="position" value={formData.position} onChange={e => handleSelectChange('position', e.target.value)} placeholder="Enter position (e.g., Software Engineer)" required />
+                      <Input id="position" name="position" value={formData.position} onChange={e => handleSelectChange('position', e.target.value)} onKeyDown={preventEnterSubmit} placeholder="Enter position (e.g., Software Engineer)" required />
                     </div>
 
                     <div className="grid gap-2">
                       <Label htmlFor="interview_date">Interview Date</Label>
-                      {/* Interview Date Section */}
                       <div className="flex items-center gap-2">
-                        {/* Input Field */}
                         <Input
                           id="interview_date"
                           name="interview_date"
                           value={formData.interview_date}
                           onChange={(e) => handleSelectChange('interview_date', e.target.value)}
+                          onKeyDown={preventEnterSubmit}
                           placeholder="mm/dd/yyyy"
-                          className="w-[240px]" // Adjust width of the input
+                          className="w-[240px]" 
                         />
 
                         {/* Date Picker Button */}
                         <DatePicker value={formData.interview_date} onChange={(date) => handleSelectChange('interview_date', date)} />
                       </div>
                     </div>
+                    
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="grid gap-2">
-                      <Label htmlFor="round_number">Round Number</Label>
+                      <Label htmlFor="round_number">Round</Label>
                       <Select value={formData.round_number.toString()} onValueChange={(value) => handleSelectChange('round_number', parseInt(value, 10))}>
                         <SelectTrigger><SelectValue placeholder="Select round number" /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="0">Application</SelectItem>
-                          <SelectItem value="1">Round 1</SelectItem>
-                          <SelectItem value="2">Round 2</SelectItem>
-                          <SelectItem value="3">Round 3</SelectItem>
-                          <SelectItem value="4">Round 4</SelectItem>
-                          <SelectItem value="5">Round 5</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="grid gap-2">
-                      <Label htmlFor="round_type">Round Type</Label>
-                      <Select value={formData.round_type} onValueChange={(value) => handleSelectChange('round_type', value)}>
-                        <SelectTrigger><SelectValue placeholder="Select round type" /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="online_assessment">Online Assessment</SelectItem>
-                          <SelectItem value="technical_interview">Technical Interview</SelectItem>
-                          <SelectItem value="hr_interview">HR Interview</SelectItem>
-                          <SelectItem value="system_design">System Design</SelectItem>
-                          <SelectItem value="behavioral">Behavioral Interview</SelectItem>
+                          <SelectItem value="1">Online Assessment</SelectItem>
+                          <SelectItem value="2">Technical Interview</SelectItem>
+                          <SelectItem value="3">Behavioral Interview</SelectItem>
+                          <SelectItem value="4">System Design</SelectItem>
+                          <SelectItem value="5">HR Interview</SelectItem>
+                          <SelectItem value="6">Team Match</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -265,15 +261,12 @@ const CreatePost: React.FC = () => {
                 {/* Content Field with contentEditable */}
                 <div
                   id="content-field"
+                  ref={contentRef}
                   contentEditable
                   onInput={handleChange}
-                  className="min-h-[200px] p-2 border rounded relative"
+                  className="min-h-[200px] p-2 border rounded relative whitespace-pre-wrap before:content-[attr(data-placeholder)] before:text-gray-400 before:absolute before:top-2 before:left-2 empty:before:block"
                 >
-                  {formData.content === "" && (
-                    <span className="absolute top-1 left-2 text-gray-400">Share your experience or thoughts...</span>
-                  )}
                 </div>
-
                 <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
                   <Code className="h-3 w-3" /> You can use Markdown for formatting.
                 </p>
@@ -282,23 +275,39 @@ const CreatePost: React.FC = () => {
               {/* Visibility */}
               <div className="grid gap-4 pt-4">
                 <Label>Post Visibility</Label>
-                <RadioGroup value={formData.visibility} onValueChange={(value) => handleSelectChange('visibility', value)} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="flex items-start space-x-2 border rounded-lg p-4 cursor-pointer hover:bg-accent">
-                    <RadioGroupItem value="public" id="public" />
+                <RadioGroup
+                  value={formData.visibility}
+                  onValueChange={(value) => handleSelectChange('visibility', value)}
+                  className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                >
+                  <Label
+                    htmlFor="public"
+                    className={`flex items-start space-x-2 border rounded-lg p-4 cursor-pointer hover:bg-accent ${
+                      formData.visibility === 'public' ? 'border-primary' : ''
+                    }`}
+                  >
+                    <RadioGroupItem value="public" id="public" className="mt-1" />
                     <div className="grid gap-1">
-                      <Label htmlFor="public" className="cursor-pointer">Public</Label>
+                      <span className="font-medium">Public</span>
                       <p className="text-sm text-muted-foreground">Everyone can see this post</p>
                     </div>
-                  </div>
-                  <div className="flex items-start space-x-2 border rounded-lg p-4 cursor-pointer hover:bg-accent">
-                    <RadioGroupItem value="private" id="private" />
+                  </Label>
+
+                  <Label
+                    htmlFor="private"
+                    className={`flex items-start space-x-2 border rounded-lg p-4 cursor-pointer hover:bg-accent ${
+                      formData.visibility === 'private' ? 'border-primary' : ''
+                    }`}
+                  >
+                    <RadioGroupItem value="private" id="private" className="mt-1" />
                     <div className="grid gap-1">
-                      <Label htmlFor="private" className="cursor-pointer">Private</Label>
+                      <span className="font-medium">Private</span>
                       <p className="text-sm text-muted-foreground">Only you can see this post</p>
                     </div>
-                  </div>
+                  </Label>
                 </RadioGroup>
               </div>
+
 
               {/* Buttons */}
               <div className="flex justify-between pt-6 gap-2">

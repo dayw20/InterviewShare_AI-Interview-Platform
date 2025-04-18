@@ -37,7 +37,7 @@ export default function CurveTimeline() {
         className="w-full"
         preserveAspectRatio="xMidYMin meet"
       >
-        {/* S 曲线 */}
+
         <path
           ref={pathRef}
           d="M 50 50 C 150 100, 150 200, 50 250
@@ -49,9 +49,9 @@ export default function CurveTimeline() {
           fill="none"
         />
 
-        {/* 节点 + 标签 */}
+     
         {points.map((point, index) => {
-          const isLeft = point.x < 200 // 判断节点位于左侧还是右侧
+          const isLeft = point.x < 200 
 
           return (
             <g key={index}>
@@ -65,7 +65,7 @@ export default function CurveTimeline() {
                 onMouseLeave={() => setHoverIndex(null)}
               />
 
-              {/* 公司名称 */}
+        
               <text
                 x={isLeft ? point.x + 12 : point.x - 12}
                 y={point.y - 6}
@@ -75,7 +75,6 @@ export default function CurveTimeline() {
                 {timelineData[index].company}
               </text>
 
-              {/* 日期 */}
               <text
                 x={isLeft ? point.x + 12 : point.x - 12}
                 y={point.y + 12}
@@ -85,7 +84,7 @@ export default function CurveTimeline() {
                 {timelineData[index].date}
               </text>
 
-              {/* Hover 展开阶段 */}
+        
               {hoverIndex === index && (
                 <foreignObject
                   x={isLeft ? point.x + 20 : point.x - 140}

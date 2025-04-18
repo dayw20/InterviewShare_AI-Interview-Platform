@@ -1,6 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { ResizablePanel, ResizablePanelGroup, ResizableHandle } from "@/components/ui/resizable";
 import CodingPracticeEditor from "./components/ai/Coding";
-import ProblemsBar from "./components/ai/ProblemsBar";
+import InteractiveProblemPanel from "./components/ai/InteractiveProblemPanel";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AppSidebar } from "./components/ai/AppSidebar"; 
+import { Separator } from "@/components/ui/separator"
+
+import { Typography } from "@mui/material";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar"
 
 interface Problem {
   id: number;
@@ -12,6 +23,30 @@ interface Problem {
 function Aimock() {
   const [output, setOutput] = useState<string>("");
   const [selectedProblem, setSelectedProblem] = useState<Problem | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // Sidebar state
+  const [leftPanelWidth, setLeftPanelWidth] = useState(50); // Interactive panel width state
+  
+  // Add effect to handle window resizing
+  useEffect(() => {
+    // Function to handle resize
+    const handleResize = () => {
+      // This will force a re-render when the window is resized
+      // which helps the resizable panels adjust properly
+      setLeftPanelWidth(prev => prev);
+    };
+    
+    // Add event listener
+    window.addEventListener('resize', handleResize);
+    
+    // Clean up
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  const setCodeExternally = (code: string) => {
+    console.log("Code updated externally:", code);
+  };
 
   const handleCodeSubmit = async (code: string) => {
     try {
@@ -35,16 +70,110 @@ function Aimock() {
     }
   };
 
+  // Function to select problem
+  const onProblemSelect = (problem: Problem) => {
+    setSelectedProblem(problem);
+  };
+
+  // Toggle sidebar visibility
+  const toggleSidebar = () => {
+    setIsSidebarOpen((prev) => !prev);
+    // When sidebar is toggled, we need to manually trigger a resize event
+    // to make sure resizable panels adjust correctly
+    setTimeout(() => {
+      window.dispatchEvent(new Event('resize'));
+    }, 300); // Match this with your transition duration
+  };
+
   return (
-    <div className="flex min-h-screen">
-      <ProblemsBar onProblemSelect={setSelectedProblem} />
-      <main className="flex-1 bg-gray-50 overflow-auto">
-        <CodingPracticeEditor
-          selectedProblem={selectedProblem}
-          onSubmit={handleCodeSubmit}
-          output={output}
-        />
-      </main>
+    <div className="flex h-screen overflow-hidden bg-background">
+      <SidebarProvider>
+        {/* Sidebar for problems */}
+        <div 
+          className={`transition-all duration-300 ease-in-out`} 
+          style={{ width: isSidebarOpen ? '16rem' : '0' }}
+        >
+          <AppSidebar onProblemSelect={onProblemSelect} />
+        </div>
+
+        {/* Main content outside of sidebar constraints */}
+        <div className="flex flex-1 flex-col overflow-hidden">
+        <header className="flex h-16 shrink-0 items-center gap-2 border-b">
+          <div className="flex items-center gap-2 px-3">
+            <SidebarTrigger onClick={toggleSidebar} />
+            <span className="text-sm text-muted-foreground">Problem</span>
+            <Separator orientation="vertical" className="ml-2 mr-2 h-4" />
+          </div>
+        </header>
+
+
+          {/* Main content area */}
+          <div className="flex-1 overflow-auto">
+            <div className="h-full min-h-[calc(100vh-4rem)]">
+              {/* Resizable panel group for the main content */}
+              <ResizablePanelGroup direction="horizontal" className="h-full">
+                {/* Left Panel - Interactive Problem */}
+                <ResizablePanel defaultSize={40} minSize={30}>
+                  <div className="h-full flex flex-col border-r bg-white">
+                    <div className="flex-1 flex flex-col justify-start px-4 pt-2 pb-0">
+                      <InteractiveProblemPanel
+                        questionId={selectedProblem ? String(selectedProblem.id) : ""}
+                        currentCode={output}
+                      />
+                    </div>
+                  </div>
+                </ResizablePanel>
+
+
+                <ResizableHandle />
+
+                {/* Right Panel - Code Editor and Output */}
+                <ResizablePanel defaultSize={60} minSize={30}>
+                  <ResizablePanelGroup direction="vertical">
+                      {/* Top: title + description */}
+                      <ResizablePanel defaultSize={25}>
+                        <div className="px-4 pt-2">
+                          <Card className="w-full bg-white rounded-lg hover:shadow-lg transition-all duration-300 mt-6 max-h-[300px] overflow-auto">
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+                                {selectedProblem?.title || "Problem Description"}
+                              </CardTitle>
+                            </CardHeader>
+
+                            <CardContent className="space-y-4">
+                              {selectedProblem?.description ? (
+                                <Typography variant="body1">{selectedProblem.description}</Typography>
+                              ) : (
+                                <div className="text-muted-foreground text-sm text-center py-2">
+                                  Please select a problem to view its description.
+                                </div>
+                              )}
+                            </CardContent>
+                          </Card>
+                        </div>
+                      </ResizablePanel>
+
+
+                      <ResizableHandle />
+
+                      {/* Bottom: editor */}
+                      <ResizablePanel defaultSize={75}>
+                        <div className="flex-1 p-4">
+                          <CodingPracticeEditor
+                            selectedProblem={selectedProblem}
+                            onSubmit={handleCodeSubmit}
+                            output={output}
+                            setCodeExternally={setCodeExternally}
+                          />
+                        </div>
+                      </ResizablePanel>
+                    </ResizablePanelGroup>
+                </ResizablePanel>
+              </ResizablePanelGroup>
+            </div>
+          </div>
+        </div>
+      </SidebarProvider>
     </div>
   );
 }

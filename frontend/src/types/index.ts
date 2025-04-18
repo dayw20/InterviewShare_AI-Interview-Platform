@@ -20,7 +20,9 @@ export interface User {
     id: number;
     title: string;
     round_number: number;
+    round_type:string;
     interview_date: string;
+
     status?: 'pass' | 'fail' | 'pending';
   }
   
@@ -112,5 +114,5 @@ export interface PostData {
     visibility: 'public' | 'private';
     interview_date: string;
     round_number: number;
-    round_type: 'online_assessment' | 'technical_interview' | 'hr_interview' | 'system_design' | 'behavioral';
+    round_type: string;
   }

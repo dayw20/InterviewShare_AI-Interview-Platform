@@ -30,7 +30,17 @@ const Login: React.FC = () => {
       });
       if (!res.ok) throw new Error("Invalid credentials");
       const data = await res.json() as LoginResponse;
-      login(data.key, { username: form.username });
+      // login(data.key, { username: form.username });
+      const profileRes = await fetch("http://localhost:8000/api/users/me/", {
+        headers: { Authorization: `Token ${data.key}` }
+      });
+      const profileData = await profileRes.json();
+    
+      // ✅ login 并包括 avatar
+      login(data.key, {
+        username: form.username,
+        avatar: profileData.avatar // 👈 把 avatar 存进去
+      });
       navigate("/posts");
     } catch (err) {
       setError(err instanceof Error ? err.message : "An unknown error occurred");
@@ -55,7 +65,19 @@ const Login: React.FC = () => {
 
       if (res.ok) {
         const data = await res.json();
-        login(data.token, data.user);
+        // login(data.token, data.user);
+ 
+        const profileRes = await fetch("http://localhost:8000/api/users/me/", {
+          headers: { Authorization: `Token ${data.token}` }
+        });
+    
+        const profileData = await profileRes.json();
+    
+        // ✅ 存储 token + avatar
+        login(data.token, {
+          username: profileData.user.username,
+          avatar: profileData.avatar
+        });
         navigate("/posts");
       } else {
         setError("Google authentication failed");

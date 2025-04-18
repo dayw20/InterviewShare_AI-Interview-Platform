@@ -18,7 +18,7 @@ const ProblemsBar: React.FC<ProblemsBarProps> = ({ onProblemSelect }) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/problems/")
+    fetch("/api/problems/")
       .then((res) => {
         if (!res.ok) throw new Error("Network response was not ok");
         return res.json();
@@ -32,16 +32,12 @@ const ProblemsBar: React.FC<ProblemsBarProps> = ({ onProblemSelect }) => {
   }, []);
 
   return (
-    <aside className="w-64 h-screen overflow-y-auto border-r p-4 bg-white">
-      <h3 className="text-lg font-semibold mb-4">Problems</h3>
-
+    <aside className="w-64 h-full overflow-y-auto bg-white border-r p-4">
       {loading && <p className="text-sm text-muted-foreground">Loading problems...</p>}
       {error && <p className="text-sm text-destructive">{error}</p>}
-
       {!loading && !error && problems.length === 0 && (
         <p className="text-sm text-muted-foreground">No problems available.</p>
       )}
-
       {!loading && !error && problems.length > 0 && (
         <ul className="space-y-2">
           {problems.map((p) => (

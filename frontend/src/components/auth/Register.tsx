@@ -49,7 +49,18 @@ const Register: React.FC = () => {
       if (!loginRes.ok) throw new Error("Registered but failed to log in.");
 
       const loginData = await loginRes.json() as LoginResponse;
-      login(loginData.key, { username: form.username });
+      // login(loginData.key, { username: form.username });
+ 
+      const profileRes = await fetch("http://localhost:8000/api/users/me/", {
+        headers: { Authorization: `Token ${loginData.key}` }
+      });
+      const profileData = await profileRes.json();
+      
+      // ✅ 登录并带上 avatar
+      login(loginData.key, {
+        username: form.username,
+        avatar: profileData.avatar
+      });
       navigate("/posts");
     } catch (err) {
       setError(err instanceof Error ? err.message : "An unknown error occurred");

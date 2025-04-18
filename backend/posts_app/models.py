@@ -12,6 +12,8 @@ class UserProfile(models.Model):
     activity_count = models.PositiveIntegerField(default=0) 
     exp = models.PositiveIntegerField(default=0)
     followers = models.ManyToManyField('self', symmetrical=False, related_name='following', blank=True)
+    avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
+
 
     def __str__(self):
         return self.user.username
@@ -126,6 +128,7 @@ class ProblemSolveLog(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     problem = models.ForeignKey(Problem, on_delete=models.CASCADE)
     solved_at = models.DateTimeField(auto_now_add=True)
+    passed = models.BooleanField(default=False)
 
     class Meta:
         unique_together = ('user', 'problem')

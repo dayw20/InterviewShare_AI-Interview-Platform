@@ -3,16 +3,14 @@ import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Plus } from 'lucide-react';
+import { Plus, Menu } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { Menu } from 'lucide-react';
 
 const Navbar: React.FC = () => {
   const { isAuthenticated, user, logout } = useContext(AuthContext);
@@ -28,10 +26,8 @@ const Navbar: React.FC = () => {
     <nav className="w-full border-b bg-background sticky top-0 z-50">
       <div className="container mx-auto flex items-center justify-between px-4 py-3">
         <div className="flex items-center gap-6">
-        <img src="/public/logo.jpg" alt="InterviewHub Logo" className="h-8 w-8" />  {/* Logo */}
-          <h1 className="text-xl font-bold">
-            InterviewHub
-          </h1>
+          <img src="/logo.jpg" alt="InterviewShare Logo" className="h-8 w-8" />
+          <h1 className="text-xl font-bold">InterviewShare</h1>
 
           <div className="hidden md:flex gap-4">
             <Button variant="ghost" asChild>
@@ -43,7 +39,6 @@ const Navbar: React.FC = () => {
           </div>
         </div>
 
-        {/* Right: User menu or Auth buttons */}
         <div className="flex items-center gap-4">
           {isAuthenticated ? (
             <>
@@ -67,10 +62,6 @@ const Navbar: React.FC = () => {
 
                 <DropdownMenuContent align="end">
                   <DropdownMenuLabel>{user?.username || "User"}</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => navigate('/profile')}>Profile</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate('/settings')}>Settings</DropdownMenuItem>
-                  <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -86,7 +77,6 @@ const Navbar: React.FC = () => {
             </>
           )}
 
-          {/* Mobile menu toggle */}
           <Button
             variant="ghost"
             size="icon"
@@ -98,7 +88,6 @@ const Navbar: React.FC = () => {
         </div>
       </div>
 
-      {/* Mobile menu */}
       {mobileMenuOpen && (
         <div className="md:hidden border-t bg-background px-4 py-3 space-y-2">
           <Button variant="ghost" className="w-full justify-start" asChild>
@@ -107,16 +96,11 @@ const Navbar: React.FC = () => {
           <Button variant="ghost" className="w-full justify-start" asChild>
             <Link to="/mock-interviews">Mock Lab</Link>
           </Button>
+
           {isAuthenticated ? (
             <>
               <Button variant="ghost" className="w-full justify-start" asChild>
                 <Link to="/dashboard">Dashboard</Link>
-              </Button>
-              <Button variant="ghost" className="w-full justify-start" asChild>
-                <Link to="/profile">Profile</Link>
-              </Button>
-              <Button variant="ghost" className="w-full justify-start" asChild>
-                <Link to="/settings">Settings</Link>
               </Button>
               <Button variant="ghost" className="w-full justify-start" onClick={handleLogout}>
                 Logout

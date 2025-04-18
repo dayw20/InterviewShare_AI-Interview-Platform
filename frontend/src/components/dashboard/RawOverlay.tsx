@@ -8,7 +8,7 @@ interface RowOverlayProps {
 export default function RowOverlay({ onClose, renderRightContent }: RowOverlayProps) {
   return (
     <>
-      {/* 左侧短条 */}
+
       <motion.div
         onClick={(e) => {
           e.stopPropagation()
@@ -21,7 +21,7 @@ export default function RowOverlay({ onClose, renderRightContent }: RowOverlayPr
         transition={{ duration: 0.2 }}
       />
 
-      {/* 右侧长条 */}
+
       <motion.div
         className="absolute right-0 top-0 bottom-0 w-9/10 bg-gray-200 z-10 rounded-l px-4 py-2"
         initial={{ x: "100%" }}

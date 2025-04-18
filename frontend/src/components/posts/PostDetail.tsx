@@ -1,6 +1,6 @@
 // src/components/posts/PostDetail.tsx
 import React, { useState, useEffect, ChangeEvent, FormEvent, useRef } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { Post, Comment, LikeResponse, PostDetailData } from '../../types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from '@/components/ui/label';
@@ -33,8 +33,9 @@ const PostDetail: React.FC = () => {
   const [replyText, setReplyText] = useState<string>('');
   const [replyingTo, setReplyingTo] = useState<number | null>(null);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState<boolean>(false);
+  const location = useLocation();
 
-  const storedUser = localStorage.getItem('user');
+  const storedUser = sessionStorage.getItem('user');
   const currentUsername = storedUser ? JSON.parse(storedUser).username : null;
   const isAuthor = post?.user?.username === currentUsername;
   
@@ -49,7 +50,7 @@ const PostDetail: React.FC = () => {
     
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       const headers: HeadersInit = { 'Content-Type': 'application/json' };
       if (token) {
         headers['Authorization'] = `Token ${token}`;
@@ -57,10 +58,11 @@ const PostDetail: React.FC = () => {
       const response = await fetch(`/api/posts/${id}/`, { headers });
       if (!response.ok) throw new Error('Post not found');
       const data: PostDetailData = await response.json();
-      setPost({
-        ...data,
-        timeline: data.timeline || [], 
-      });
+      // setPost({
+      //   ...data,
+      //   timeline: data.timeline || [], 
+      // });
+      setPost(data);
       setError(null);
     } catch (error) {
       setError(error instanceof Error ? error.message : 'An unknown error occurred');
@@ -74,7 +76,7 @@ const PostDetail: React.FC = () => {
     if (!commentText.trim() || !id) return;
 
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       if (!token) {
         navigate('/login', { state: { from: `/posts/${id}` } });
         return;
@@ -100,7 +102,7 @@ const PostDetail: React.FC = () => {
     if (!replyText.trim() || !id) return;
 
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       if (!token) {
         navigate('/login', { state: { from: `/posts/${id}` } });
         return;
@@ -125,7 +127,7 @@ const PostDetail: React.FC = () => {
     if (!id) return;
     
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       if (!token) {
         navigate('/login', { state: { from: `/posts/${id}` } });
         return;
@@ -177,14 +179,20 @@ const PostDetail: React.FC = () => {
         <Card className="w-full relative">
           {/* Sticky top bar */}
           <div className="sticky top-0 z-30 bg-background border-b flex items-center justify-between px-4 py-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate('/posts')}
-              className="gap-1"
-            >
-              ← Back to Posts
-            </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              const fromScrollY = location.state?.fromScrollY ?? 0;
+              sessionStorage.setItem('restoreScrollY', String(fromScrollY));
+              navigate('/posts');
+            }}
+            className="gap-1"
+          >
+            ← Back to Posts
+          </Button>
+
+
             <span className="text-sm text-muted-foreground">
               {post.company} - {post.position}
             </span>
@@ -223,7 +231,7 @@ const PostDetail: React.FC = () => {
                 <AvatarImage src={post.user.avatar || '/default-avatar.png'} alt={post.user.username} />
                 <AvatarFallback>{post.user.username?.[0]?.toUpperCase() || 'U'}</AvatarFallback>
               </Avatar>
-              <Link to={`/users/${post.user.username}`} className="font-medium hover:underline">
+              <Link to={`/users/${post.user.id}`} className="font-medium hover:underline">
                 {post.user.username}
               </Link>
             </div>
@@ -270,7 +278,7 @@ const PostDetail: React.FC = () => {
                     onValueChange={async (value) => {
                       setIsUpdatingStatus(true);
                       try {
-                        const token = localStorage.getItem('token');
+                        const token = sessionStorage.getItem('token');
                         const response = await fetch(`/api/posts/${post.id}/`, {
                           method: 'PATCH',
                           headers: {
@@ -353,10 +361,11 @@ const PostDetail: React.FC = () => {
                           : 'text-muted-foreground group-hover:text-primary'
                         }`}>
                           <div className="flex flex-col text-sm">
-                            <span className="capitalize">
-                              {item.round_number === 0 ? 'Application' : `Round ${item.round_number}`}
-                              {item.interview_date && ` • ${new Date(item.interview_date).toLocaleDateString()}`}
-                            </span>
+                          <span className="capitalize">
+                            {item.round_type?.replace(/_/g, ' ') || 'Unknown Round'}
+                            {item.interview_date && ` • ${new Date(item.interview_date).toLocaleDateString()}`}
+                          </span>
+
                             <span className="text-xs capitalize">
                               {item.status || 'pending'}
                             </span>
@@ -408,7 +417,7 @@ const PostDetail: React.FC = () => {
                       <AvatarFallback>{comment.user.username?.[0]?.toUpperCase() || 'U'}</AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col xs:flex-row xs:items-center gap-1 xs:gap-2">
-                      <Link to={`/users/${comment.user.username}`} className="font-medium hover:underline">
+                      <Link to={`/users/${comment.user.id}`} className="font-medium hover:underline">
                         {comment.user.username}
                       </Link>
                       <span className="text-xs text-muted-foreground">
@@ -476,7 +485,7 @@ const PostDetail: React.FC = () => {
                               <AvatarFallback>{reply.user.username?.[0]?.toUpperCase() || 'U'}</AvatarFallback>
                             </Avatar>
                             <div className="flex flex-col xs:flex-row xs:items-center gap-1 xs:gap-2">
-                              <Link to={`/users/${reply.user.username}`} className="font-medium text-sm hover:underline">
+                              <Link to={`/users/${reply.user.id}`} className="font-medium text-sm hover:underline">
                                 {reply.user.username}
                               </Link>
                               <span className="text-xs text-muted-foreground">

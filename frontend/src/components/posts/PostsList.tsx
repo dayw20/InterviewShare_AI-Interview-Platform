@@ -1,4 +1,4 @@
-// src/components/posts/PostsList.tsx
+// PostsList.tsx (with Load More Pagination)
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import PostsFilter from './PostsFilter'; 
@@ -17,7 +17,13 @@ const StyledPostItem: React.FC<{
 
   return (
     <Card className="mb-4 overflow-hidden hover:shadow-md transition-shadow">
-      <div className="cursor-pointer" onClick={() => navigate(`/posts/${post.id}`)}>
+      <div className="cursor-pointer" 
+      onClick={() => {
+        navigate(`/posts/${post.id}`, {
+          state: { fromScrollY: window.scrollY },
+        });
+      }}
+      >
         <CardHeader className="pb-2">
           <div className="flex justify-between items-start">
             <div className="space-y-1">
@@ -42,19 +48,16 @@ const StyledPostItem: React.FC<{
             </div>
           </div>
         </CardHeader>
-        
         <CardContent className="pb-2">
           <p className="line-clamp-2 text-sm text-muted-foreground">{post.content}</p>
         </CardContent>
       </div>
-      
       <CardFooter className="pt-0 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="text-xs text-muted-foreground">
             Posted {new Date(post.created_at).toLocaleDateString()}
           </span>
         </div>
-        
         <div className="flex items-center gap-2">
           <Button 
             variant={post.liked ? "default" : "ghost"} 
@@ -68,7 +71,6 @@ const StyledPostItem: React.FC<{
             <ThumbsUp className="h-3 w-3" />
             <span className="text-xs">{post.likes_count || 0}</span>
           </Button>
-
           <div className="text-xs text-muted-foreground">
             <span>Comments: {post.comments_count || 0}</span>
           </div>
@@ -83,9 +85,8 @@ const PostsList: React.FC = () => {
   const [filteredPosts, setFilteredPosts] = useState<Post[]>([]);
   const [trendingPosts, setTrendingPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const navigate = useNavigate();
-  const trendingTimeoutRef = useRef<number | null>(null);
-
+  const [loadingMore, setLoadingMore] = useState<boolean>(false);
+  const [nextPageUrl, setNextPageUrl] = useState<string | null>(null);
   const [filters, setFilters] = useState<FilterOptions>({
     company: 'all',
     roundType: 'all',
@@ -95,39 +96,27 @@ const PostsList: React.FC = () => {
     orderBy: '-created_at'  
   });
   const [showFilterBar, setShowFilterBar] = useState(true);
+  const navigate = useNavigate();
   const lastScrollY = useRef(window.scrollY);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-
-      if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
-        // Scrolling down
-        setShowFilterBar(false);
-      } else if (currentScrollY < lastScrollY.current) {
-        // Scrolling up
-        setShowFilterBar(true);
-      }
-
-      lastScrollY.current = currentScrollY;
-    };
-
-    window.addEventListener('scroll', handleScroll);
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
-  
-  
+  const trendingTimeoutRef = useRef<number | null>(null);
   const location = useLocation(); 
 
   useEffect(() => {
     fetchPosts();
-  }, [location, filters.orderBy]); 
-  
+  }, [location, filters.orderBy]);
+
   useEffect(() => {
-    // Apply filters whenever filters change
+    if (!loading) {
+      const scrollY = sessionStorage.getItem('restoreScrollY');
+      if (scrollY) {
+        window.scrollTo({ top: parseInt(scrollY), behavior: 'instant' });
+        sessionStorage.removeItem('restoreScrollY');
+      }
+    }
+  }, [loading]);
+  
+
+  useEffect(() => {
     applyFilters();
   }, [filters, posts]);
 
@@ -139,38 +128,30 @@ const PostsList: React.FC = () => {
     try {
       const response = await fetch('/api/posts/trending/');
       if (!response.ok) throw new Error('Failed to fetch trending posts');
-      
       const data = await response.json();
       setTrendingPosts(data);
     } catch (error) {
       console.error('Error fetching trending posts:', error);
     }
   };
-  
+
   const fetchPosts = async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
       if (filters.orderBy) params.append('ordering', filters.orderBy);
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       const headers: HeadersInit = { 'Content-Type': 'application/json' };
-      if (token) {
-        headers['Authorization'] = `Token ${token}`;
-      }
+      if (token) headers['Authorization'] = `Token ${token}`;
 
       const response = await fetch(`/api/posts/?${params.toString()}`, { headers });
-
       if (!response.ok) throw new Error('Failed to fetch posts');
-      
+
       const data = await response.json();
-      
-      // Handle both array response and paginated object response
-      const postsArray: Post[] = Array.isArray(data) 
-        ? data 
-        : ((data as ApiResponse<Post>).results || []);
-        
+      const postsArray: Post[] = data.results || [];
       setPosts(postsArray);
       setFilteredPosts(postsArray);
+      setNextPageUrl(data.next || null);
     } catch (error) {
       console.error('Error fetching posts:', error);
     } finally {
@@ -178,119 +159,76 @@ const PostsList: React.FC = () => {
     }
   };
 
+  const loadMorePosts = async () => {
+    if (!nextPageUrl) return;
+    try {
+      setLoadingMore(true);
+      const token = sessionStorage.getItem('token');
+      const headers: HeadersInit = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Token ${token}`;
+
+      const response = await fetch(nextPageUrl, { headers });
+      if (!response.ok) throw new Error('Failed to load more posts');
+      const data = await response.json();
+      const morePosts: Post[] = data.results || [];
+      const updated = [...posts, ...morePosts];
+      setPosts(updated);
+      setFilteredPosts(updated);
+      setNextPageUrl(data.next || null);
+    } catch (error) {
+      console.error('Error loading more posts:', error);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
   const applyFilters = () => {
-    if (!Array.isArray(posts)) {
-      setFilteredPosts([]);
-      return;
-    }
     let result = [...posts];
-    
-    // Apply company filter
     if (filters.company && filters.company !== 'all') {
-      result = result.filter(post =>
-        post.company &&
-        post.company.toLowerCase().includes(filters.company.toLowerCase())
-      );
+      result = result.filter(post => post.company?.toLowerCase().includes(filters.company.toLowerCase()));
     }
-    
-    // Apply round number filter
     if (filters.roundNumber && filters.roundNumber !== 'all') {
-      result = result.filter(post => {
-        // Assuming post has a 'round_number' property that might be a string or number
-        const postRoundNumber = typeof post.round_number === 'number' 
-          ? post.round_number 
-          : parseInt(post.round_number as unknown as string);
-        
-        return postRoundNumber === parseInt(filters.roundNumber);
-      });
+      result = result.filter(post => Number(post.round_number) === Number(filters.roundNumber));
     }
-    
-    // Apply post type filter
     if (filters.postType && filters.postType !== 'all') {
-      result = result.filter(post => 
-        post.post_type === filters.postType
-      );
+      result = result.filter(post => post.post_type === filters.postType);
     }
-    
-    // Apply search query (across title and content)
     if (filters.searchQuery) {
       const query = filters.searchQuery.toLowerCase();
-      result = result.filter(post => 
-        post.title.toLowerCase().includes(query) || 
-        post.content.toLowerCase().includes(query)
-      );
+      result = result.filter(post => post.title.toLowerCase().includes(query) || post.content.toLowerCase().includes(query));
     }
-    
     setFilteredPosts(result);
   };
 
   const handleFilterChange = (newFilters: Partial<FilterOptions>) => {
     setFilters({ ...filters, ...newFilters });
   };
-  
+
   const handleLike = async (postId: number) => {
     try {
-      const token = localStorage.getItem('token');
-      
-      if (!token) {
-        // Redirect to login or show login prompt
-        navigate('/login', { state: { from: location } });
-        return;
-      }
-      
+      const token = sessionStorage.getItem('token');
+      if (!token) return navigate('/login', { state: { from: location } });
       const response = await fetch(`/api/posts/${postId}/like/`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Token ${token}`,
-        },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Token ${token}` },
         credentials: 'include',
       });
-  
-      if (!response.ok) {
-        throw new Error('Failed to like the post');
-      }
-  
-      const data = await response.json() as LikeResponse;
-  
-      // Update posts state
-      setPosts(prevPosts =>
-        prevPosts.map(post =>
-          post.id === postId
-            ? { ...post, likes_count: data.likes_count, liked: data.liked }
-            : post
-        )
-      );
-  
-      // Re-fetch trending if needed
-      if (trendingTimeoutRef.current) {
-        window.clearTimeout(trendingTimeoutRef.current);
-      }
-  
-      trendingTimeoutRef.current = window.setTimeout(() => {
-        fetchTrendingPosts();
-      }, 500);
-  
-    } catch (error) {
-      console.error('Error toggling like:', error);
+      if (!response.ok) throw new Error('Failed to like');
+      const data = await response.json();
+      setPosts(prev => prev.map(p => p.id === postId ? { ...p, likes_count: data.likes_count, liked: data.liked } : p));
+    } catch (err) {
+      console.error(err);
     }
   };
-  
+
   return (
     <div className="container mx-auto px-4 pb-6">
       <div className="flex justify-between items-center mb-4">
         <PageHeader title="Interview Experiences" description="Browse all shared interview posts" />
       </div>
-  
-      <div
-        className={`sticky top-[60px] z-40 mb-4 bg-background border-b transition-transform duration-300 ${
-          showFilterBar ? 'translate-y-0 shadow-md' : '-translate-y-full'
-        }`}        
-      >
+      <div className={`sticky top-[60px] z-40 mb-4 bg-background border-b transition-transform duration-300 ${showFilterBar ? 'translate-y-0 shadow-md' : '-translate-y-full'}`}>
         <PostsFilter filters={filters} onFilterChange={handleFilterChange} />
       </div>
-
-  
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           {loading ? (
@@ -308,47 +246,51 @@ const PostsList: React.FC = () => {
               </CardContent>
             </Card>
           ) : (
-            <div className="space-y-4">
-              {filteredPosts.map(post => (
-                <StyledPostItem key={post.id} post={post} onLike={handleLike} />
-              ))}
-            </div>
+            <>
+              <div className="space-y-4">
+                {filteredPosts.map(post => (
+                  <StyledPostItem key={post.id} post={post} onLike={handleLike} />
+                ))}
+              </div>
+              {nextPageUrl && (
+                <div className="flex justify-center mt-6">
+                  <Button onClick={loadMorePosts} disabled={loadingMore}>
+                    {loadingMore ? 'Loading...' : 'Load More'}
+                  </Button>
+                </div>
+              )}
+            </>
           )}
         </div>
-  
         <div className="order-first lg:order-last">
-        <Card className="w-full bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-3xl font-semibold text-gray-800">Trending</CardTitle>
-          </CardHeader>
-          <CardContent className="divide-y">
-            {trendingPosts.length === 0 ? (
-              <div className="text-center py-4 text-muted-foreground">
-                <p>No trending posts yet</p>
-              </div>
-            ) : (
-              trendingPosts.map((post) => (
-                <div
-                  key={post.id}
-                  className="py-3 cursor-pointer hover:bg-muted/10 transition-colors rounded-lg p-3"
-                  onClick={() => navigate(`/posts/${post.id}`)}
-                >
-                  <h4 className="font-semibold text-base mb-2 text-gray-900 line-clamp-2">{post.title}</h4>
-                  <div className="flex justify-between items-center text-xs text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      {post.company && <span className="font-medium text-gray-600">{post.company}</span>}
-                      <span>{new Date(post.created_at).toLocaleDateString()}</span>
-                    </div>
-                    <div className="flex items-center gap-1 text-gray-500">
-                      <ThumbsUp className="h-3 w-3" />
-                      <span>{post.likes_count || 0}</span>
+          <Card className="w-full bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-3xl font-semibold text-gray-800">Trending</CardTitle>
+            </CardHeader>
+            <CardContent className="divide-y">
+              {trendingPosts.length === 0 ? (
+                <div className="text-center py-4 text-muted-foreground">
+                  <p>No trending posts yet</p>
+                </div>
+              ) : (
+                trendingPosts.map((post) => (
+                  <div key={post.id} className="py-3 cursor-pointer hover:bg-muted/10 transition-colors rounded-lg p-3" onClick={() => navigate(`/posts/${post.id}`)}>
+                    <h4 className="font-semibold text-base mb-2 text-gray-900 line-clamp-2">{post.title}</h4>
+                    <div className="flex justify-between items-center text-xs text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        {post.company && <span className="font-medium text-gray-600">{post.company}</span>}
+                        <span>{new Date(post.created_at).toLocaleDateString()}</span>
+                      </div>
+                      <div className="flex items-center gap-1 text-gray-500">
+                        <ThumbsUp className="h-3 w-3" />
+                        <span>{post.likes_count || 0}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))
-            )}
-          </CardContent>
-        </Card>
+                ))
+              )}
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
