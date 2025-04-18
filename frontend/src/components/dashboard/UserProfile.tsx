@@ -215,9 +215,13 @@ export default function UserProfile() {
           record.interview_details?.status?.toLowerCase().includes(term)
       )
     }
-
+    if (filterBy === "company" || filterBy === "position" || filterBy == "phase") {
+      data.sort((a, b) => a[filterBy].localeCompare(b[filterBy]))
+    } else if (filterBy === "interview_date") {
+      data.sort((a, b) => new Date(b.interview_date).getTime() - new Date(a.interview_date).getTime())
+    }
     return data
-  }, [searchTerm, groupedRecords])
+  }, [searchTerm, groupedRecords, filterBy])
 
   const fetchFollowList = async (type: "followers" | "following") => {
     if (!userInfo?.user?.id) return;
@@ -606,7 +610,6 @@ export default function UserProfile() {
                   <DropdownMenuLabel>Filter by</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => setFilterBy("interview_date")}>Interview Date</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setFilterBy("phase")}>Phase</DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setFilterBy("company")}>Company</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

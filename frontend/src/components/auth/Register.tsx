@@ -41,11 +41,18 @@ const Register: React.FC = () => {
       const data = await res.json();
       if (!res.ok) throw new Error(Object.entries(data).map(([key, val]) => `${key}: ${val}`).join("\n"));
 
+      await fetch(`${backendUrl}/csrf/`, { credentials: 'include' });
+      const newCsrfToken = document.cookie.split('; ').find(row => row.startsWith('csrftoken='))?.split('=')[1] || '';
       const loginRes = await fetch(`${backendUrl}/auth/login/`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": newCsrfToken,
+        },
+        credentials: "include",
         body: JSON.stringify({ username: form.username, password: form.password1 }),
       });
+      
 
       if (!loginRes.ok) throw new Error("Registered but failed to log in.");
 
@@ -57,7 +64,7 @@ const Register: React.FC = () => {
       });
       const profileData = await profileRes.json();
       
-      // ✅ 登录并带上 avatar
+ 
       login(loginData.key, {
         username: form.username,
         avatar: profileData.avatar

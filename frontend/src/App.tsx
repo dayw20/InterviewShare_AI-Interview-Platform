@@ -12,7 +12,6 @@ import Register from './components/auth/Register';
 import UserProfile from './components/dashboard/UserProfile';
 import Layout from './Layout';
 import Aimock from './Aimock';
-import ScrollToTop from './ScrollToTop';
 
 const AnimatedRoutes: React.FC = () => {
   const location = useLocation();
@@ -63,7 +62,6 @@ const AnimatedRoutes: React.FC = () => {
 const App: React.FC = () => {
   return (
     <Router>
-      <ScrollToTop />
       <AnimatedRoutes />
       <ToastContainer
         position="top-right"

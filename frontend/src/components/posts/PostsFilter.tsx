@@ -76,7 +76,7 @@ const PostsFilter: React.FC<PostsFilterProps> = ({ filters, onFilterChange }) =>
 
       {/* Round Number Select */}
       <Select
-        value={filters.roundNumber || 'all'} // Ensure 'all' is used as the default
+        value={filters.roundNumber || 'all'} 
         onValueChange={(value) => {
           const roundMapping: { [key: string]: string } = {
             'Application': '0',
@@ -88,7 +88,6 @@ const PostsFilter: React.FC<PostsFilterProps> = ({ filters, onFilterChange }) =>
             'Team Match': '6',
           };
 
-          // Update the filter based on the selected value
           onFilterChange({ roundNumber: roundMapping[value] || 'all' });
         }}
       >
@@ -103,7 +102,7 @@ const PostsFilter: React.FC<PostsFilterProps> = ({ filters, onFilterChange }) =>
           <SelectItem value="all">Rounds</SelectItem>
           {['Application', 'Online Assessment', 'Technical Interview', 'Behavioral Interview', 'System Design', 'HR Interview', 'Team Match'].map((type, index) => (
             <SelectItem key={type} value={type}>
-              {type} {/* Display the round names */}
+              {type} 
             </SelectItem>
           ))}
         </SelectContent>

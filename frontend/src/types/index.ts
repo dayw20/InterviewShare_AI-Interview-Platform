@@ -51,6 +51,11 @@ export interface User {
 
   // Optional, loaded in detailed views
   comments?: Comment[];
+
+  interview_details?: {
+    round_number: number;
+    round_type: string;
+  };
 }
 
 export interface PostData {
@@ -77,7 +82,9 @@ export interface PostData {
     user: User; 
     comments: Comment[];
     timeline: TimelineItem[];
+    visibility: string;
     interview_details?: {
+      visibility: string;
       round_number: number;
       round_type: string;
       position: string;

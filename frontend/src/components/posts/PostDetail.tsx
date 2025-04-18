@@ -1,7 +1,7 @@
 // src/components/posts/PostDetail.tsx
 import React, { useState, useEffect, ChangeEvent, FormEvent, useRef } from 'react';
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
-import { Post, Comment, LikeResponse, PostDetailData } from '../../types';
+import { LikeResponse, PostDetailData } from '../../types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from '@/components/ui/label';
 import { toast } from 'react-toastify';
@@ -13,16 +13,23 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription,
-  CardFooter
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { ThumbsUp, Share2 } from 'lucide-react';
+import { ThumbsUp } from 'lucide-react';
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
+const roundTypeMap: Record<number, string> = {
+  0: "Application",
+  1: "Online Assessment",
+  2: "Technical Interview",
+  3: "Behavioral Interview",
+  4: "System Design",
+  5: "HR Interview",
+  6: "Team Match",
+};
 
 const PostDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -59,10 +66,6 @@ const PostDetail: React.FC = () => {
       const response = await fetch(`${backendUrl}/posts/${id}/`, { headers });
       if (!response.ok) throw new Error('Post not found');
       const data: PostDetailData = await response.json();
-      // setPost({
-      //   ...data,
-      //   timeline: data.timeline || [], 
-      // });
       setPost(data);
       setError(null);
     } catch (error) {
@@ -207,14 +210,15 @@ const PostDetail: React.FC = () => {
                   {post.company}
                 </Badge>
               )}
-              {post.post_type === 'interview' && post.round_type && (
+              {post.post_type === 'interview' && post.interview_details?.round_number !== undefined && (
                 <Badge variant="outline" className="font-medium">
-                  {post.round_type.replace(/_/g, ' ')}
+                  {roundTypeMap[post.interview_details.round_number]}
                 </Badge>
               )}
-              {post.post_type === 'interview' && post.round_number && (
-                <Badge variant="outline" className="font-medium">
-                  Round {post.round_number}
+      
+              {post.visibility && (
+                <Badge variant="secondary" className="font-medium capitalize">
+                  {post.visibility}
                 </Badge>
               )}
               {post.interview_date && (
@@ -261,15 +265,7 @@ const PostDetail: React.FC = () => {
                 <ThumbsUp className="h-4 w-4" />
                 <span>{post.likes_count || 0}</span>
               </Button>
-    
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-2"
-              >
-                <Share2 className="h-4 w-4" />
-                <span>Share</span>
-              </Button>
+
     
               {isAuthor && post?.interview_details && (
                 <div className="bg-muted rounded-md p-2 flex items-center space-x-2">
@@ -363,7 +359,7 @@ const PostDetail: React.FC = () => {
                         }`}>
                           <div className="flex flex-col text-sm">
                           <span className="capitalize">
-                            {item.round_type?.replace(/_/g, ' ') || 'Unknown Round'}
+                            {roundTypeMap[item.round_number] || 'Unknown Round'}
                             {item.interview_date && ` • ${new Date(item.interview_date).toLocaleDateString()}`}
                           </span>
 

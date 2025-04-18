@@ -1,12 +1,12 @@
-// PostsList.tsx (with Load More Pagination)
+// PostsList.tsx 
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import PostsFilter from './PostsFilter'; 
 import { Post, FilterOptions, LikeResponse, ApiResponse } from '../../types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Flame, Plus, Search, ThumbsUp } from 'lucide-react';
+import { Search, ThumbsUp } from 'lucide-react';
 import PageHeader from '@/components/layout/PageHeader';
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 

@@ -1,6 +1,5 @@
 import { Eye, ThumbsUp, Star, MessageSquare } from "lucide-react"
 
-// CommunityStatsPanel.tsx
 
 interface CommunityStatsPanelProps {
   posts_count: number
