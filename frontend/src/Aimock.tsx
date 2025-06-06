@@ -91,11 +91,9 @@ function Aimock() {
   // Toggle sidebar visibility
   const toggleSidebar = () => {
     setIsSidebarOpen((prev) => !prev);
-    // When sidebar is toggled, we need to manually trigger a resize event
-    // to make sure resizable panels adjust correctly
     setTimeout(() => {
       window.dispatchEvent(new Event('resize'));
-    }, 300); // Match this with your transition duration
+    }, 300); 
   };
 
   return (

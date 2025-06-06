@@ -569,15 +569,14 @@ def ask_for_hint_solution_feedback(request):
                 max_tokens=700,
                 temperature=0.7
             )
-        except openai.error.OpenAIError as e:  # Catch all OpenAI errors
+        except openai.error.OpenAIError as e:  
             logging.error(f"OpenAI call failed with error: {e}")
             return JsonResponse({"error": f"OpenAI call failed: {e}"}, status=400)
-        except Exception as e:  # Catch other exceptions
+        except Exception as e: 
             logging.error(f"Unexpected error: {e}")
             return JsonResponse({"error": f"Unexpected error: {e}"}, status=500)
 
         gpt_answer = response.choices[0].message["content"]
-        # Save GPT's answer as 'assistant' role
         conversation_history.append({"role": "assistant", "content": gpt_answer})
         CONVERSATION_STORE[question_id] = conversation_history
         print("✅ Using OpenAI key:", openai.api_key)
