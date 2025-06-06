@@ -5,7 +5,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-^q(8(6lzq$&^tw6-_x23tsbxi9=88#_@ayipuz@%%42t$#g0g0'
 DEBUG = True
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['interviewshare-platform.onrender.com']
+
 
 # Application definition
 INSTALLED_APPS = [
