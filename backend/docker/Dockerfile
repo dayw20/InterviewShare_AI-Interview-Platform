@@ -11,7 +11,7 @@ WORKDIR /app
 COPY ../.. .
 
 # 安装 Python 依赖
-RUN pip install --no-cache-dir -r backend/requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # 确保我们有权限运行代码执行器（如使用 docker.sock）
 ENV PYTHONUNBUFFERED=1
