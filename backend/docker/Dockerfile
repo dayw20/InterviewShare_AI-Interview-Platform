@@ -17,5 +17,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 ENV PYTHONUNBUFFERED=1
 
 # 启动 Django 项目（改成你的实际 settings 模块名）
-CMD ["gunicorn", "interview_plazza.wsgi:application", "--bind", "0.0.0.0:8000"]
+CMD ["gunicorn", "interview_plaza.wsgi:application", "--bind", "0.0.0.0:8000"]
 
