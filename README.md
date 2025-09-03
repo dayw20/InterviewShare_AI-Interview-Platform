@@ -1,6 +1,10 @@
-# Interview Experience Sharing Platform
+# InterviewShare AI Interview Platform
 
 A modern, full-stack web application for sharing interview experiences and practicing with AI-powered mock interviews, built with cutting-edge technologies and a focus on user experience.
+
+> **About**: An intelligent platform that connects job seekers and professionals through AI-powered mock interviews, experience sharing, and secure coding practice. Built with Django, React, and modern AI technologies.
+
+**Topics**: `ai-interview` `django` `react` `typescript` `machine-learning` `interview-prep` `coding-practice` `full-stack`
 
 ![Frontend](https://img.shields.io/badge/Frontend-React%20%2B%20TypeScript-blue)
 ![Backend](https://img.shields.io/badge/Backend-Django%20%2B%20DRF-green)
@@ -165,5 +169,14 @@ python manage.py test
 ```bash
 cd frontend
 npm test
+npm run test:coverage  # Run with coverage report
+npm run test:ui        # Run with UI interface
 ```
+
+### Continuous Integration
+This project uses GitHub Actions for automated testing:
+- **Backend**: Python tests, linting with flake8
+- **Frontend**: React tests, linting with ESLint, build verification
+
+Tests run automatically on every push and pull request.
 
