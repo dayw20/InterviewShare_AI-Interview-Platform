@@ -1,75 +1,119 @@
 # Interview Experience Sharing Platform
 
-A full-stack web application for sharing interview experiences, built with:
-- **Frontend**: React, TypeScript, Vite, Tailwind CSS
-- **Backend**: Django, Django REST Framework
-- **Additional**: Docker (for code execution sandbox)
+A modern, full-stack web application for sharing interview experiences and practicing with AI-powered mock interviews, built with cutting-edge technologies and a focus on user experience.
 
-## Features
+![Platform](https://img.shields.io/badge/Platform-Interview%20Sharing-blue)
+![Frontend](https://img.shields.io/badge/Frontend-React%20%2B%20TypeScript-blue)
+![Backend](https://img.shields.io/badge/Backend-Django%20%2B%20DRF-green)
+![AI](https://img.shields.io/badge/AI-Mock%20Interview-orange)
+![Code Sandbox](https://img.shields.io/badge/Feature-Code%20Execution-purple)
 
-- User authentication (email/password and Google OAuth)
-- Create and share interview experiences
-- Like, comment, and view post details
-- Filter and search posts by company, post type, etc.
-- User profiles with statistics
-- AI Mock Interview practice environment
-- Code execution sandbox for coding problems
+## 🚀 Platform Overview
 
-## Prerequisites
+Interviewshare is a comprehensive platform that connects job seekers and professionals through shared interview experiences. It features an AI-powered mock interview system and a secure code execution sandbox for technical practice.
 
-- Node.js (v18+)
-- Python (v3.8+)
-- Docker and Docker Compose
-- Git
+### ✨ Key Features
 
-## Getting Started
+- **AI Mock Interviews**: Practice with intelligent interview simulations
+- **Code Execution Sandbox**: Safe environment for coding practice
+- **Experience Sharing**: Create and share interview experiences
+- **Secure Authentication**: Email/password and Google OAuth support
+- **Interactive Community**: Like, comment, and engage with posts
+- **Smart Filtering**: Search by company, post type, and more
+- **User Profiles**: Comprehensive statistics and achievements
+- **Responsive Design**: Works seamlessly on all devices
+
+## 🏗️ Architecture
+
+```
+interviewshare/
+├── backend/              # Django REST Framework API
+│   ├── posts_app/        # Interview posts management
+│   ├── users_app/        # User authentication & profiles
+│   ├── ai_interview/     # AI mock interview logic
+│   └── code_sandbox/     # Code execution system
+├── frontend/             # React TypeScript UI
+│   ├── components/       # Reusable React components
+│   ├── context/          # State management
+│   ├── lib/              # Utility functions
+│   └── types/            # TypeScript definitions
+└── docker/               # Containerized services
+    └── code-sandbox/     # Secure code execution
+```
+
+## 🛠️ Technology Stack
+
+### Frontend
+- **React 18+** - Modern UI framework
+- **TypeScript** - Type-safe development
+- **Vite** - Fast build tool and dev server
+- **Tailwind CSS** - Utility-first CSS framework
+- **React OAuth** - Google authentication integration
+
+### Backend
+- **Django 4+** - Web framework
+- **Django REST Framework** - API development
+- **Python 3.8+** - Core programming language
+- **SQLite/PostgreSQL** - Database options
+- **JWT Authentication** - Secure token-based auth
+
+### DevOps & Tools
+- **Docker** - Containerization
+- **Git** - Version control
+- **ESLint** - Code quality
+- **Prettier** - Code formatting
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- **Node.js 18+** and **npm** for frontend
+- **Python 3.8+** and **pip** for backend
+- **Docker** and **Docker Compose** for code sandbox
+- **Git** for version control
 
 ### 1. Clone the Repository
 
 ```bash
-git clone <repository-url>
-cd interviewshare
+git clone https://github.com/dayw20/Interviewshare_AI-Interview-Platform.git
+cd Interviewshare_AI-Interview-Platform
 ```
 
 ### 2. Backend Setup
 
-#### Create a Virtual Environment
-
+#### Create Virtual Environment
 ```bash
-# Create a virtual environment
+# Create virtual environment
 python -m venv venv
 
-# Activate it
-# On Windows
-venv\Scripts\activate
-# On macOS/Linux
+# Activate (macOS/Linux)
 source venv/bin/activate
+
+# Activate (Windows)
+venv\Scripts\activate
 ```
 
 #### Install Dependencies
-
 ```bash
 cd backend
 pip install -r requirements.txt
 ```
 
 #### Database Setup
-
 ```bash
 # Run migrations
 python manage.py migrate
 
-# Create a superuser (optional)
+# Create superuser (optional)
 python manage.py createsuperuser
 ```
 
-#### Start the Django Server
-
+#### Start Django Server
 ```bash
 python manage.py runserver
 ```
 
-The backend will be available at http://127.0.0.1:8000/
+Backend will be available at `http://127.0.0.1:8000/`
 
 ### 3. Frontend Setup
 
@@ -79,86 +123,50 @@ npm install
 npm run dev
 ```
 
-The frontend will be available at http://localhost:5173/
+Frontend will be available at `http://localhost:5173/`
 
-### 4. Code Execution Sandbox Setup
-
-Build the Docker image for the code execution sandbox:
+### 4. Code Execution Sandbox
 
 ```bash
-cd code-sandbox
+cd docker/code-sandbox
 docker build -t code-sandbox .
 ```
 
-## Project Structure
+- `POST /api/code-verification/` - Execute and verify code
+- `GET /api/problems/` - List coding problems
+- `POST /api/ai-interview/` - Start AI mock interview
 
-```
-interview-experience-platform/
-├── backend/                  # Django backend
-│   ├── posts_app/            # Main application
-│   │   ├── models.py         # Database models
-│   │   ├── serializers.py    # API serializers
-│   │   ├── views.py          # API endpoints
-│   │   └── urls.py           # URL routing
-│   └── ...
-├── frontend/                 # React frontend
-│   ├── src/
-│   │   ├── components/       # React components
-│   │   ├── context/          # Context providers
-│   │   ├── lib/              # Utility functions
-│   │   ├── types/            # TypeScript types
-│   │   ├── App.tsx           # Main App component
-│   │   └── main.tsx          # Entry point
-│   └── ...
-└── code-sandbox/             # Docker container for code execution
-    └── run_user_code.py      # Python script for code execution
-```
+## ⚙️ Environment Configuration
 
-## API Endpoints
-
-- **Authentication**:
-  - `/auth/login/` - Login
-  - `/auth/registration/` - Register
-  - `/auth/google/` - Google OAuth login
-
-- **Posts**:
-  - `/api/posts/` - List/Create posts
-  - `/api/posts/<id>/` - Retrieve/Update/Delete post
-  - `/api/posts/<id>/like/` - Like/Unlike post
-  - `/api/posts/<id>/add_comment/` - Add comment to post
-  - `/api/posts/trending/` - Get trending posts
-
-- **Users**:
-  - `/api/users/<id>/` - User profile
-  - `/api/users/me/` - Current user profile
-  - `/api/users/<id>/follow/` - Follow/Unfollow user
-
-- **Code Execution**:
-  - `/api/code-verification/` - Execute and verify user code
-  - `/api/problems/` - List coding problems
-
-## Environment Variables
-
-### Frontend
-Create a `.env` file in the frontend directory with:
-
-```
+### Frontend Environment
+Create `.env` file in `frontend/` directory:
+```env
 VITE_API_URL=http://localhost:8000
 VITE_GOOGLE_CLIENT_ID=<your-google-client-id>
 ```
 
-### Backend
-Create a `.env` file in the backend directory with:
-
-```
+### Backend Environment
+Create `.env` file in `backend/` directory:
+```env
 SECRET_KEY=<your-django-secret-key>
 DEBUG=True
 ALLOWED_HOSTS=localhost,127.0.0.1
 DATABASE_URL=sqlite:///db.sqlite3
+GOOGLE_OAUTH_CLIENT_ID=<your-google-client-id>
+GOOGLE_OAUTH_CLIENT_SECRET=<your-google-client-secret>
 ```
 
-## Development Workflow
+## 🧪 Testing
 
-1. Start the backend server
-2. Start the frontend development server
-3. Make sure the Docker daemon is running for code execution
+### Backend Tests
+```bash
+cd backend
+python manage.py test
+```
+
+### Frontend Tests
+```bash
+cd frontend
+npm test
+```
+
