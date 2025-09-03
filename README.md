@@ -2,7 +2,6 @@
 
 A modern, full-stack web application for sharing interview experiences and practicing with AI-powered mock interviews, built with cutting-edge technologies and a focus on user experience.
 
-![Platform](https://img.shields.io/badge/Platform-Interview%20Sharing-blue)
 ![Frontend](https://img.shields.io/badge/Frontend-React%20%2B%20TypeScript-blue)
 ![Backend](https://img.shields.io/badge/Backend-Django%20%2B%20DRF-green)
 ![AI](https://img.shields.io/badge/AI-Mock%20Interview-orange)
