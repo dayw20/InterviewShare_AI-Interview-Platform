@@ -4,8 +4,6 @@ A modern, full-stack web application for sharing interview experiences and pract
 
 ![Frontend](https://img.shields.io/badge/Frontend-React%20%2B%20TypeScript-blue)
 ![Backend](https://img.shields.io/badge/Backend-Django%20%2B%20DRF-green)
-![AI](https://img.shields.io/badge/AI-Mock%20Interview-orange)
-![Code Sandbox](https://img.shields.io/badge/Feature-Code%20Execution-purple)
 
 ## 🚀 Platform Overview
 
